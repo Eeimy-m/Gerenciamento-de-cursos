@@ -26,8 +26,12 @@ int submenu(int *opcao) {
     scanf("%d", *opcao);
 }
 
+int submenuRelatorios(int *opcao) {
+
+}
+
 int main() {
-    int opcao = 0, opcaoSubmenu = 0;
+    int opcao = 0, opcaoSubmenu = 0, opcaoSubmenurelatorios = 0;
     do {
         mainMenu(&opcao);
         switch (opcao) {
