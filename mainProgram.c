@@ -26,8 +26,16 @@ void submenu(int *opcao) {
     scanf("%d", opcao);
 }
 
-int submenuRelatorios(int *opcao) {
-
+void submenuRelatorios(int *opcao) {
+    printf("\n=============================");
+    printf("\nSubmenu Relatórios:");
+    printf("\n1- Mostrar dados de todos os alunos de um curso");
+    printf("\n2- Mostrar os dados de todos os cursos oferecidos entre as datas X e Y");
+    printf("\n3- Mostrar os dados de todos os cursos realizados por um aluno");
+    printf("\n=============================");
+    printf("\n");
+    printf("\nSelecione uma das opções:");
+    scanf("%d", opcao);
 }
 
 int main() {
@@ -41,7 +49,7 @@ int main() {
                 submenu(&opcaoSubmenu);
                 switch (opcaoSubmenu) {
                     case 1:
-                        printf("\nVoce selecionou 1");
+                        printf("\nVoce selecionou 1"); //teste 
                         break;
                     case 2:
                         printf("\nVoce selecionou 2");
@@ -54,7 +62,6 @@ int main() {
                         break;
                 break;
                 }
-            //Inserir a resposta pra opção selecionada
             case 2:
                 printf("\n=============================");
                 printf("\nSubmenu de Cursos:");
@@ -94,10 +101,8 @@ int main() {
                     }
                 break;
             case 4:
-                printf("\n=============================");
-                printf("\nSubmenu Relatórios:");
-                submenu(&opcaoSubmenu);
-                    switch (opcaoSubmenu) {
+                submenuRelatorios(&opcaoSubmenurelatorios);
+                    switch (opcaoSubmenurelatorios) {
                         case 1:
                             printf("\nVoce selecionou 1");
                             break;
@@ -106,9 +111,6 @@ int main() {
                             break;
                         case 3:
                             printf("\nVoce selecionou 3");
-                            break;
-                        case 4:
-                            printf("\nVoce selecionou 4");
                             break;
                     }
                 break;
