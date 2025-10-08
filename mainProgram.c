@@ -1,7 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 
-int mainMenu(int *opcao) {
+void mainMenu(int *opcao) {
     printf("\n=============================");
     printf("\nMenu principal:");
     printf("\n1- Submenu de Alunos");
@@ -12,10 +12,10 @@ int mainMenu(int *opcao) {
     printf("\n=============================");
     printf("\n");
     printf("\nSelecione uma das opções acima: ");
-    scanf("%d", *opcao);
+    scanf("%d", opcao);
 }
 
-int submenu(int *opcao) {
+void submenu(int *opcao) {
     printf("\n1- Listar todos");
     printf("\n2- Listar um");
     printf("\n3- Incluir");
@@ -23,7 +23,7 @@ int submenu(int *opcao) {
     printf("\n=============================");
     printf("\n");
     printf("\nSelecione uma das opções acima: ");
-    scanf("%d", *opcao);
+    scanf("%d", opcao);
 }
 
 int submenuRelatorios(int *opcao) {
@@ -39,20 +39,83 @@ int main() {
                 printf("\n=============================");
                 printf("\nSubmenu de Alunos:");
                 submenu(&opcaoSubmenu);
+                switch (opcaoSubmenu) {
+                    case 1:
+                        printf("\nVoce selecionou 1");
+                        break;
+                    case 2:
+                        printf("\nVoce selecionou 2");
+                        break;
+                    case 3:
+                        printf("\nVoce selecionou 3");
+                        break;
+                    case 4:
+                        printf("\nVoce selecionou 4");
+                        break;
+                break;
+                }
             //Inserir a resposta pra opção selecionada
             case 2:
                 printf("\n=============================");
                 printf("\nSubmenu de Cursos:");
                 submenu(&opcaoSubmenu);
+                    switch (opcaoSubmenu) {
+                        case 1:
+                            printf("\nVoce selecionou 1");
+                            break;
+                        case 2:
+                            printf("\nVoce selecionou 2");
+                            break;
+                        case 3:
+                            printf("\nVoce selecionou 3");
+                            break;
+                        case 4:
+                            printf("\nVoce selecionou 4");
+                            break;
+                    }
+                break;
             case 3:
                 printf("\n=============================");
                 printf("\nSubmenu de Matrícula:");
                 submenu(&opcaoSubmenu);
+                    switch (opcaoSubmenu) {
+                        case 1:
+                            printf("\nVoce selecionou 1");
+                            break;
+                        case 2:
+                            printf("\nVoce selecionou 2");
+                            break;
+                        case 3:
+                            printf("\nVoce selecionou 3");
+                            break;
+                        case 4:
+                            printf("\nVoce selecionou 4");
+                            break;
+                    }
+                break;
             case 4:
                 printf("\n=============================");
                 printf("\nSubmenu Relatórios:");
                 submenu(&opcaoSubmenu);
+                    switch (opcaoSubmenu) {
+                        case 1:
+                            printf("\nVoce selecionou 1");
+                            break;
+                        case 2:
+                            printf("\nVoce selecionou 2");
+                            break;
+                        case 3:
+                            printf("\nVoce selecionou 3");
+                            break;
+                        case 4:
+                            printf("\nVoce selecionou 4");
+                            break;
+                    }
+                break;
         }
     }
     while(opcao != 5);
+    if(opcao == 5) {
+        printf("Encerrando programa.");
+    }
 }
