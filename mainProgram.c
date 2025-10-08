@@ -1,6 +1,16 @@
 #include<stdio.h>
 #include<stdlib.h>
 
+struct aluno {
+    char cpf[14], nome[40], dataNascimento[10], sexo, emails[10][40], telefones[10][14];
+    //int quantEmails, quantTelefones;
+};
+
+struct curso {
+    char codigo[10], descricao[60];
+    float preco, cargaHoraria;
+};
+
 void mainMenu(int *opcao) {
     printf("\n=============================");
     printf("\nMenu principal:");
