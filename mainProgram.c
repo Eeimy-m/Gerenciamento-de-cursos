@@ -72,9 +72,9 @@ int incluirAluno(struct aluno listaAlunos[], int quant) {
     for(i = 0; i < quantEmails; i++) {
         scanf("%s", &listaAlunos[quant].emails[i]);
     }
-    printf("");
     printf("\n");
     printf("\ne-mail(s) inserido(s) com sucesso.");
+    printf("\n");
     printf("\nInforme a quantidade de números telefônicos: ");
     scanf("%d", &quantTelefones);
     printf("\nInsira a seguir o(s) telefone(s): ");
@@ -154,6 +154,12 @@ int main() {
                     case 4:
                         printf("\nVoce selecionou 4");
                         break;
+                    default:
+                        system("clear||cls");
+                        printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                        printf("\nA opção inserida não é válida, tente novamente.");
+                        printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                        printf("\n");
                 }
                 break;
             case 2:
@@ -228,11 +234,18 @@ int main() {
                             printf("\nVoce selecionou 3");
                             break;
                     }
+            default:
+                system("clear||cls");
+                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                printf("\nA opção inserida não é válida, tente novamente.");
+                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                printf("\n");
                 break;
         }
     }
     while(opcao != 5);
     if(opcao == 5) {
+        system("clear||cls");
         printf("\n");
         printf("\n=============================");
         printf("\nEncerrando programa.");
