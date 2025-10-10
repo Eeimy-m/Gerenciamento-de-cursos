@@ -117,6 +117,7 @@ int main() {
                         break;
                     case 3:
                         cpfExiste = 0;
+                        system("clear||cls");
                         printf("\nIncluindo aluno no sistema...");
                         printf("\n");
                         printf("\n Informe o CPF do aluno (apenas os números): ");
@@ -136,6 +137,7 @@ int main() {
                             resultado = incluirAluno(alunos, quantAlunos);
                             if(resultado == 1) { //feedback
                                 quantAlunos++;
+                                system("clear||cls");
                                 printf("\n=============================");
                                 printf("\nAluno adicionado ao sistema com sucesso!");
                                 printf("\n=============================");
@@ -181,6 +183,7 @@ int main() {
                             if(codigoExiste == 0) {
                                 resultado = incluirCurso(cursos, quantCursos);
                                 if(resultado == 1) {
+                                    system("clear||cls");
                                     printf("\n=============================");
                                     printf("\nCurso cadastrado com sucesso!");
                                     printf("\n=============================");
@@ -230,6 +233,9 @@ int main() {
     }
     while(opcao != 5);
     if(opcao == 5) {
-        printf("Encerrando programa.");
+        printf("\n");
+        printf("\n=============================");
+        printf("\nEncerrando programa.");
+        printf("\n=============================");
     }
 }
