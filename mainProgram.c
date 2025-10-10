@@ -13,6 +13,12 @@ struct curso {
     float preco, cargaHoraria;
 };
 
+struct matricula {
+    int cpfAluno; //Não pode existir mais de um mesmo cpf com um mesmo código de curso
+    float desconto;
+    char codigoCurso[10], dataInicio, dataFim;
+};
+
 void mainMenu(int *opcao) {
     printf("\n=============================");
     printf("\nMenu principal:");
