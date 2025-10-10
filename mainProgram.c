@@ -9,7 +9,7 @@ struct aluno {
 };
 
 struct curso {
-    char codigo[10], descricao[60]; //código é único por currso
+    char codigo[10], descricao[60]; //código é único por curso
     float preco, cargaHoraria;
 };
 
@@ -80,10 +80,21 @@ int incluirAluno(struct aluno listaAlunos[], int quant) {
     return 1;
 }
 
+int incluirCurso(struct curso listaCursos[], int quantCursos) {
+    printf("\nDescrição do curso: ");
+    getchar();
+    fgets(listaCursos[quantCursos].descricao, 60, stdin);
+    printf("\nCarga horária: ");
+    scanf("%f", &listaCursos[quantCursos].cargaHoraria);
+    printf("\nPreço: ");
+    scanf("%f", &listaCursos[quantCursos].preco);
+    return 1;
+}
+
 int main() {
     struct aluno alunos[100];
     struct curso cursos[20];
-    int opcao = 0, opcaoSubmenu = 0, opcaoSubmenurelatorios = 0, i, quantAlunos = 0, cpfExiste, resultado = 0, cpf;
+    int opcao = 0, opcaoSubmenu = 0, opcaoSubmenurelatorios = 0, i, quantAlunos = 0, cpfExiste, resultado = 0, cpf, quantCursos = 0, codigoExiste = 0;
     do {
         mainMenu(&opcao);
         switch (opcao) {
@@ -93,7 +104,7 @@ int main() {
                 submenu(&opcaoSubmenu);
                 switch (opcaoSubmenu) {
                     case 1:
-                        printf("\nVoce selecionou 1"); //teste 
+                        printf("\nVocê selecionou 1"); //teste 
                         break;
                     case 2:
                         printf("\nVoce selecionou 2");
@@ -128,6 +139,7 @@ int main() {
                                 printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                                 printf("\nNão foi possível adicionar o aluno ao sistema.");
                                 printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                                printf("\n");
                             }
                         } 
                         break;
@@ -148,7 +160,27 @@ int main() {
                             printf("\nVoce selecionou 2");
                             break;
                         case 3:
-                            printf("\nVoce selecionou 3");
+                            printf("\nInsira o código do curso a ser inserido no sistema: ");
+                            scanf("%s", &cursos[quantCursos].codigo);
+                            for(i = 0; i < quantCursos && codigoExiste == 0; i++) {
+                                if(strcmp(cursos[quantCursos].codigo, cursos[i].codigo) == 0) {
+                                    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                                    printf("\nO código inserido já existe no sistema.");
+                                    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                                    printf("\n");
+                                    codigoExiste = 1;
+                                    break;
+                                }
+                            }
+                            if(codigoExiste == 0) {
+                                resultado = incluirCurso(cursos, quantCursos);
+                                if(resultado == 1) {
+                                    printf("\n=============================");
+                                    printf("\nCurso cadastrado com sucesso!");
+                                    printf("\n=============================");
+                                    printf("\n");
+                                }
+                            }
                             break;
                         case 4:
                             printf("\nVoce selecionou 4");
