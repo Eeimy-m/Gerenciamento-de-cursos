@@ -97,10 +97,42 @@ int incluirCurso(struct curso listaCursos[], int quantCursos) {
     return 1;
 }
 
+int verificarCPF(struct aluno listaAlunos[], int cpf, int quantAlunos) {
+    int i;
+    if(quantAlunos == 0) {
+        return -1;
+    }
+    else {
+        for(i = 0; i < quantAlunos; i++) {
+            if(cpf == listaAlunos[i].cpf) {
+                return i; //retorna a posição do cpf caso ele seja encontrado na struct (0...100)
+            }
+        }
+        return -1; //não foi encontrado
+    }
+}
+
+int verificarCodigo(struct curso listaCursos[], char codigo[], int quantCursos) {
+    int i, j, quantIguais, resultado;
+    if(quantCursos == 0) {
+        return -1;
+    }
+    else {
+        for(i = 0; i < quantCursos; i++) {
+            resultado = strcmp(codigo, listaCursos[i].codigo);
+            if(resultado == 0) {
+                return i;
+            }
+        }
+        return -1;
+    }
+}
+
 int main() {
     struct aluno alunos[100];
     struct curso cursos[20];
-    int opcao = 0, opcaoSubmenu = 0, opcaoSubmenurelatorios = 0, i, quantAlunos = 0, cpfExiste, resultado = 0, cpf, quantCursos = 0, codigoExiste = 0;
+    int opcao = 0, opcaoSubmenu = 0, opcaoSubmenurelatorios = 0, i, quantAlunos = 0, resultado = 0, cpf, quantCursos = 0, codigoExiste = 0;
+    char codigo[10];
     do {
         mainMenu(&opcao);
         switch (opcao) {
@@ -116,23 +148,19 @@ int main() {
                         printf("\nVoce selecionou 2");
                         break;
                     case 3:
-                        cpfExiste = 0;
                         system("clear||cls");
                         printf("\nIncluindo aluno no sistema...");
                         printf("\n");
                         printf("\n Informe o CPF do aluno (apenas os números): ");
                         scanf("%d", &cpf);
-                        for(i = 0; i < quantAlunos; i++) {
-                            if(cpf == alunos[i].cpf) {
-                                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                                printf("\nO CPF inserido já existe no sistema.");
-                                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                                printf("\n");
-                                cpfExiste = 1;
-                                break;
-                            }
-                        } 
-                        if(cpfExiste == 0 && quantAlunos < 100) {
+                        if(verificarCPF(alunos, cpf, quantAlunos) >= 0) {
+                            printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                            printf("\nO CPF inserido já existe no sistema.");
+                            printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                            printf("\n");
+                            break;
+                        }
+                        else {
                             alunos[quantAlunos].cpf = cpf;
                             resultado = incluirAluno(alunos, quantAlunos);
                             if(resultado == 1) { //feedback
@@ -169,37 +197,31 @@ int main() {
                     switch (opcaoSubmenu) {
                         case 1:
                             printf("\nVoce selecionou 1");
-                            break;
                         case 2:
                             printf("\nVoce selecionou 2");
-                            break;
                         case 3:
                             printf("\nInsira o código do curso a ser inserido no sistema: ");
-                            scanf("%s", &cursos[quantCursos].codigo);
-                            for(i = 0; i < quantCursos && codigoExiste == 0; i++) {
-                                if(strcmp(cursos[quantCursos].codigo, cursos[i].codigo) == 0) {
-                                    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                                    printf("\nO código inserido já existe no sistema.");
-                                    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                                    printf("\n");
-                                    codigoExiste = 1;
-                                    break;
-                                }
+                            scanf("%s", &codigo);
+                            if(verificarCodigo(cursos, codigo, quantCursos) >= 0) {
+                                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                                printf("\nO código inserido já existe no sistema.");
+                                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                                printf("\n");
                             }
-                            if(codigoExiste == 0) {
+                            else {
+                                strcpy(cursos[quantCursos].codigo, codigo);
                                 resultado = incluirCurso(cursos, quantCursos);
-                                if(resultado == 1) {
+                                if(resultado == 1) { //confirma se o processo de incluir foi terminado
                                     system("clear||cls");
                                     printf("\n=============================");
                                     printf("\nCurso cadastrado com sucesso!");
                                     printf("\n=============================");
                                     printf("\n");
+                                    quantCursos++;
                                 }
                             }
-                            break;
                         case 4:
                             printf("\nVoce selecionou 4");
-                            break;
                     }
                 break;
             case 3:
@@ -234,6 +256,7 @@ int main() {
                             printf("\nVoce selecionou 3");
                             break;
                     }
+                break;
             default:
                 system("clear||cls");
                 printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
