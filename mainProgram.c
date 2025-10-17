@@ -3,9 +3,8 @@
 #include<string.h>
 
 struct aluno {
-    char nome[40], dataNascimento[10], sexo, emails[10][40], telefones[10][14]; //CPF é único por aluno 
+    char nome[40], dataNascimento[10], sexo, emails[10][40], telefones[10][14], cpf[14]; //CPF é único por aluno 
     //int quantEmails, quantTelefones;
-    int cpf;
 };
 
 struct curso {
@@ -13,10 +12,9 @@ struct curso {
     float preco, cargaHoraria;
 };
 
-struct matricula {
-    int cpfAluno; //Não pode existir mais de um mesmo cpf com um mesmo código de curso
+struct matricula {//Não pode existir mais de um mesmo cpf com um mesmo código de curso
     float desconto;
-    char codigoCurso[10], dataInicio, dataFim;
+    char codigoCurso[10], dataInicio, dataFim, cpfAluno[14];
 };
 
 void mainMenu(int *opcao) {
@@ -97,15 +95,16 @@ int incluirCurso(struct curso listaCursos[], int quantCursos) {
     return 1;
 }
 
-int verificarCPF(struct aluno listaAlunos[], int cpf, int quantAlunos) {
-    int i;
+int verificarCPF(struct aluno listaAlunos[], char cpf[], int quantAlunos) {
+    int i, resultado;
     if(quantAlunos == 0) {
         return -1;
     }
     else {
         for(i = 0; i < quantAlunos; i++) {
-            if(cpf == listaAlunos[i].cpf) {
-                return i; //retorna a posição do cpf caso ele seja encontrado na struct (0...100)
+            resultado = strcmp(cpf, listaAlunos[i].cpf);
+            if(resultado == 0) {
+                return i;
             }
         }
         return -1; //não foi encontrado
@@ -113,7 +112,7 @@ int verificarCPF(struct aluno listaAlunos[], int cpf, int quantAlunos) {
 }
 
 int verificarCodigo(struct curso listaCursos[], char codigo[], int quantCursos) {
-    int i, j, quantIguais, resultado;
+    int i, j, resultado;
     if(quantCursos == 0) {
         return -1;
     }
@@ -131,8 +130,8 @@ int verificarCodigo(struct curso listaCursos[], char codigo[], int quantCursos) 
 int main() {
     struct aluno alunos[100];
     struct curso cursos[20];
-    int opcao = 0, opcaoSubmenu = 0, opcaoSubmenurelatorios = 0, i, quantAlunos = 0, resultado = 0, cpf, quantCursos = 0, codigoExiste = 0;
-    char codigo[10];
+    int opcao = 0, opcaoSubmenu = 0, opcaoSubmenurelatorios = 0, i, quantAlunos = 0, resultado = 0, quantCursos = 0, codigoExiste = 0;
+    char codigo[10], cpf[14];
     do {
         mainMenu(&opcao);
         switch (opcao) {
@@ -152,24 +151,23 @@ int main() {
                         printf("\nIncluindo aluno no sistema...");
                         printf("\n");
                         printf("\n Informe o CPF do aluno (apenas os números): ");
-                        scanf("%d", &cpf);
+                        scanf("%s", &cpf);
                         if(verificarCPF(alunos, cpf, quantAlunos) >= 0) {
                             printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                             printf("\nO CPF inserido já existe no sistema.");
                             printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                             printf("\n");
-                            break;
                         }
                         else {
-                            alunos[quantAlunos].cpf = cpf;
+                            strcpy(alunos[quantAlunos].cpf, cpf);
                             resultado = incluirAluno(alunos, quantAlunos);
                             if(resultado == 1) { //feedback
-                                quantAlunos++;
                                 system("clear||cls");
                                 printf("\n=============================");
                                 printf("\nAluno adicionado ao sistema com sucesso!");
                                 printf("\n=============================");
                                 printf("\n");
+                                quantAlunos++;
                             }
                             else {
                                 printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
