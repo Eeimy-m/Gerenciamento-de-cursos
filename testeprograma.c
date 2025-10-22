@@ -95,15 +95,17 @@ int incluirCurso(struct curso listaCursos[], int quantCursos) {
     return 1;
 }
 
-int verificarCPF(struct aluno listaAlunos[], char cpf[], int quantAlunos) {
+int verificarCPF(struct aluno listaAlunos[], const char *cpf, int quantAlunos) { //Não está identificando strings iguais
     int i, resultado;
+    printf("\n%s", cpf);
     if(quantAlunos == 0) {
         return -1;
     }
     else {
         for(i = 0; i < quantAlunos; i++) {
-            resultado = strcmp(cpf, listaAlunos[i].cpf);
-            if(resultado == 0) {
+            printf("%d", strcmp(cpf, listaAlunos[i].cpf));
+            printf("%s", listaAlunos[i].cpf);
+            if(strcmp(cpf, listaAlunos[i].cpf) == 0) {
                 return i;
             }
         }
@@ -128,64 +130,82 @@ int verificarCodigo(struct curso listaCursos[], char codigo[], int quantCursos) 
 }
 
 int main() {
-    struct aluno alunos[100];
-    struct curso cursos[20];
-    int opcao = 0, opcaoSubmenu = 0, opcaoSubmenurelatorios = 0, i, quantAlunos = 0, resultado = 0, quantCursos = 0, codigoExiste = 0;
-    char codigo[10], cpf[14];
+    //Alocar dinamicamente os vetores alunos e cursos
+    struct aluno *alunos;
+    struct curso *cursos;
+    int opcao = 0, opcaoSubmenu = 0, opcaoSubmenurelatorios = 0, i, quantAlunos = 0, resultado = 0, quantCursos = 0, codigoExiste = 0, limiteLaunos = 100, limiteCursos = 50, alocou;
+    char *codigo, *cpf; 
     do {
         mainMenu(&opcao);
         switch (opcao) {
             case 1:
-                printf("\n=============================");
-                printf("\nSubmenu de Alunos:");
-                submenu(&opcaoSubmenu);
-                switch (opcaoSubmenu) {
-                    case 1:
-                        printf("\nVocê selecionou 1"); //teste 
-                        break;
-                    case 2:
-                        printf("\nVoce selecionou 2");
-                        break;
-                    case 3:
-                        system("clear||cls");
-                        printf("\nIncluindo aluno no sistema...");
-                        printf("\n");
-                        printf("\n Informe o CPF do aluno (apenas os números): ");
-                        scanf("%s", &cpf);
-                        if(verificarCPF(alunos, cpf, quantAlunos) >= 0) {
+                alunos = (struct aluno *) malloc (limiteLaunos * sizeof(struct aluno));
+                if(alunos != NULL) {
+                    printf("\n=============================");
+                    printf("\nSubmenu de Alunos:");
+                    submenu(&opcaoSubmenu);
+                    switch (opcaoSubmenu) {
+                        case 1:
+                            printf("\nVocê selecionou 1"); //teste 
+                        case 2:
+                            printf("\nVoce selecionou 2");
+                        case 3:
+                            system("clear||cls");
+                            printf("\nIncluindo aluno no sistema...");
+                            printf("\n");
+                            printf("\n Informe o CPF do aluno (apenas os números): ");
+                            cpf = (char *) malloc(14); 
+                            if(cpf != NULL) {
+                                scanf("%14s", cpf);
+                                if(verificarCPF(alunos, cpf, quantAlunos) >= 0) {
+                                    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                                    printf("\nO CPF inserido já existe no sistema.");
+                                    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                                    printf("\n");
+                                }
+                                else {
+                                    strcpy(alunos[quantAlunos].cpf, cpf);
+                                    free(cpf);
+                                    resultado = incluirAluno(alunos, quantAlunos);
+                                    if(resultado == 1) { //feedback
+                                        system("clear||cls");
+                                        printf("\n=============================");
+                                        printf("\nAluno adicionado ao sistema com sucesso!");
+                                        printf("\n=============================");
+                                        printf("\n");
+                                        /* Print teste
+                                        printf("\n%s", alunos[quantAlunos].nome); 
+                                        printf("\n%s", alunos[quantAlunos].cpf);
+                                        printf("\n%s", alunos[quantAlunos].dataNascimento);
+                                        printf("\n%s", alunos[quantAlunos].sexo);
+                                        printf("\n%s", alunos[quantAlunos].emails);
+                                        printf("\n%s", alunos[quantAlunos].telefones);*/
+                                        quantAlunos++;
+                                    }
+                                    else {
+                                        printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                                        printf("\nNão foi possível adicionar o aluno ao sistema.");
+                                        printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                                        printf("\n");
+                                    }
+                                }
+                            } 
+                            else {
+                                printf("\nMemória indisponível.");
+                            }
+                            break;
+                        case 4:
+                            printf("\nVoce selecionou 4");
+                        default:
+                            system("clear||cls");
                             printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                            printf("\nO CPF inserido já existe no sistema.");
+                            printf("\nA opção inserida não é válida, tente novamente.");
                             printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                             printf("\n");
-                        }
-                        else {
-                            strcpy(alunos[quantAlunos].cpf, cpf);
-                            resultado = incluirAluno(alunos, quantAlunos);
-                            if(resultado == 1) { //feedback
-                                system("clear||cls");
-                                printf("\n=============================");
-                                printf("\nAluno adicionado ao sistema com sucesso!");
-                                printf("\n=============================");
-                                printf("\n");
-                                quantAlunos++;
-                            }
-                            else {
-                                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                                printf("\nNão foi possível adicionar o aluno ao sistema.");
-                                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                                printf("\n");
-                            }
-                        } 
-                        break;
-                    case 4:
-                        printf("\nVoce selecionou 4");
-                        break;
-                    default:
-                        system("clear||cls");
-                        printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                        printf("\nA opção inserida não é válida, tente novamente.");
-                        printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                        printf("\n");
+                    }
+                }
+                else {
+                    printf("\nMemória indisponível!");
                 }
                 break;
             case 2:
@@ -193,33 +213,45 @@ int main() {
                 printf("\nSubmenu de Cursos:");
                 submenu(&opcaoSubmenu);
                     switch (opcaoSubmenu) {
-                        case 1:
-                            printf("\nVoce selecionou 1");
-                        case 2:
-                            printf("\nVoce selecionou 2");
-                        case 3:
-                            printf("\nInsira o código do curso a ser inserido no sistema: ");
-                            scanf("%s", &codigo);
-                            if(verificarCodigo(cursos, codigo, quantCursos) >= 0) {
-                                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                                printf("\nO código inserido já existe no sistema.");
-                                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                                printf("\n");
-                            }
-                            else {
-                                strcpy(cursos[quantCursos].codigo, codigo);
-                                resultado = incluirCurso(cursos, quantCursos);
-                                if(resultado == 1) { //confirma se o processo de incluir foi terminado
-                                    system("clear||cls");
-                                    printf("\n=============================");
-                                    printf("\nCurso cadastrado com sucesso!");
-                                    printf("\n=============================");
-                                    printf("\n");
-                                    quantCursos++;
+                        cursos = (struct curso *) malloc(limiteCursos * sizeof(struct curso));
+                        if(cursos != NULL) { //verifica se a memória foia locada corretamente
+                            case 1:
+                                printf("\nVoce selecionou 1");
+                            case 2:
+                                printf("\nVoce selecionou 2");
+                            case 3:
+                                printf("\nInsira o código do curso a ser inserido no sistema: ");
+                                codigo = (char *) malloc(10);
+                                if(codigo != NULL) {
+                                    scanf("%s", &codigo);   
+                                    if(verificarCodigo(cursos, codigo, quantCursos) >= 0) {
+                                        printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                                        printf("\nO código inserido já existe no sistema.");
+                                        printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                                        printf("\n");
+                                    }
+                                    else {
+                                        strcpy(cursos[quantCursos].codigo, codigo);
+                                        resultado = incluirCurso(cursos, quantCursos);
+                                        if(resultado == 1) { //confirma se o processo de incluir foi terminado
+                                            system("clear||cls");
+                                            printf("\n=============================");
+                                            printf("\nCurso cadastrado com sucesso!");
+                                            printf("\n=============================");
+                                            printf("\n");
+                                            quantCursos++;
+                                        }
+                                    }
                                 }
-                            }
-                        case 4:
-                            printf("\nVoce selecionou 4");
+                                else {
+                                    printf("\nmemória indisponível.");
+                                }
+                            case 4:
+                                printf("\nVoce selecionou 4");
+                        }
+                        else {
+                            printf("\nMemória insuficiente!");
+                        }
                     }
                 break;
             case 3:
