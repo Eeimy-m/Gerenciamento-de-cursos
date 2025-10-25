@@ -17,7 +17,7 @@ struct matricula {//Não pode existir mais de um mesmo cpf com um mesmo código 
     char codigoCurso[10], dataInicio, dataFim, cpfAluno[14];
 };
 
-void mainMenu(int *opcao) {
+void mainMenu(int *opcao) { 
     printf("\n=============================");
     printf("\nMenu principal:");
     printf("\n1- Submenu de Alunos");
@@ -29,9 +29,17 @@ void mainMenu(int *opcao) {
     printf("\n");
     printf("\nSelecione uma das opções acima: ");
     scanf("%d", opcao);
+    switch(*opcao) {
+        case 1:
+            printf("\n=============================");
+            printf("\nSubmenu de Alunos:");
+
+    }
 }
 
-void submenu(int *opcao) {
+void submenu(struct aluno listaAlunos) {
+    int opcao;
+    struct aluno *alunos;
     printf("\n1- Listar todos");
     printf("\n2- Listar um");
     printf("\n3- Incluir");
@@ -40,6 +48,7 @@ void submenu(int *opcao) {
     printf("\n");
     printf("\nSelecione uma das opções acima: ");
     scanf("%d", opcao);
+    alunos = (struct aluno *) malloc (limiteAlunos * sizeof(struct aluno));
 }
 
 void submenuRelatorios(int *opcao) {
@@ -54,21 +63,21 @@ void submenuRelatorios(int *opcao) {
     scanf("%d", opcao);
 }
 
-int incluirAluno(struct aluno listaAlunos[], int quant) {
+int incluirAluno(struct aluno *listaAlunos, int *quant) {
     int quantEmails = 0, i, quantTelefones = 0;
     printf("\nNome: ");
     getchar();
-    fgets(listaAlunos[quant].nome, 40, stdin);
+    fgets(listaAlunos[*quant].nome, 40, stdin);
     printf("\nData de nascimento (dd/mm/aaaa): ");
-    scanf("%s", &listaAlunos[quant].dataNascimento);
+    scanf("%s", &listaAlunos[*quant].dataNascimento);
     printf("\nSexo: ");
     getchar();
-    scanf("%c", &listaAlunos[quant].sexo);
+    scanf("%c", &listaAlunos[*quant].sexo);
     printf("\nInforme a quantidade de e-mails a serem inseridos: ");
     scanf("%d", &quantEmails);
     printf("\nInsira a seguir o(s) e-mail(s) do aluno: ");
     for(i = 0; i < quantEmails; i++) {
-        scanf("%s", &listaAlunos[quant].emails[i]);
+        scanf("%s", &listaAlunos[*quant].emails[i]);
     }
     printf("\n");
     printf("\ne-mail(s) inserido(s) com sucesso.");
@@ -77,10 +86,19 @@ int incluirAluno(struct aluno listaAlunos[], int quant) {
     scanf("%d", &quantTelefones);
     printf("\nInsira a seguir o(s) telefone(s): ");
     for(i = 0; i < quantTelefones; i++) {
-        scanf("%s", &listaAlunos[quant].telefones[i]);
+        scanf("%s", &listaAlunos[*quant].telefones[i]);
     }
     printf("Telefone(s) inserido(s) com sucesso.");
     printf("\n");
+    (*quant)++;
+    for(i = 0; i < 1; i++) {
+        printf("\n%s", listaAlunos[*quant].cpf);
+        printf("\n%s", listaAlunos[*quant].nome);
+        printf("\n%s", listaAlunos[*quant].dataNascimento);
+        printf("\n%s", listaAlunos[*quant].sexo);
+        printf("\n%s", listaAlunos[*quant].emails);
+        printf("\n%s", listaAlunos[*quant].telefones);
+    }
     return 1;
 }
 
@@ -131,18 +149,15 @@ int verificarCodigo(struct curso listaCursos[], char codigo[], int quantCursos) 
 
 int main() {
     //Alocar dinamicamente os vetores alunos e cursos
-    struct aluno *alunos;
     struct curso *cursos;
-    int opcao = 0, opcaoSubmenu = 0, opcaoSubmenurelatorios = 0, i, quantAlunos = 0, resultado = 0, quantCursos = 0, codigoExiste = 0, limiteLaunos = 100, limiteCursos = 50, alocou;
+    int opcao = 0, opcaoSubmenu = 0, opcaoSubmenurelatorios = 0, i, quantAlunos = 0, resultado = 0, quantCursos = 0, codigoExiste = 0, limiteAlunos = 100, limiteCursos = 50, alocou;
     char *codigo, *cpf; 
     do {
         mainMenu(&opcao);
         switch (opcao) {
             case 1:
-                alunos = (struct aluno *) malloc (limiteLaunos * sizeof(struct aluno));
                 if(alunos != NULL) {
-                    printf("\n=============================");
-                    printf("\nSubmenu de Alunos:");
+
                     submenu(&opcaoSubmenu);
                     switch (opcaoSubmenu) {
                         case 1:
@@ -151,9 +166,11 @@ int main() {
                             printf("\nVoce selecionou 2");
                         case 3:
                             system("clear||cls");
+
                             printf("\nIncluindo aluno no sistema...");
                             printf("\n");
                             printf("\n Informe o CPF do aluno (apenas os números): ");
+
                             cpf = (char *) malloc(14); 
                             if(cpf != NULL) {
                                 scanf("%14s", cpf);
@@ -166,13 +183,15 @@ int main() {
                                 else {
                                     strcpy(alunos[quantAlunos].cpf, cpf);
                                     free(cpf);
-                                    resultado = incluirAluno(alunos, quantAlunos);
+                                    resultado = incluirAluno(alunos, &quantAlunos);
                                     if(resultado == 1) { //feedback
-                                        system("clear||cls");
+                                        //system("clear||cls");
+
                                         printf("\n=============================");
                                         printf("\nAluno adicionado ao sistema com sucesso!");
                                         printf("\n=============================");
                                         printf("\n");
+                                        
                                         /* Print teste
                                         printf("\n%s", alunos[quantAlunos].nome); 
                                         printf("\n%s", alunos[quantAlunos].cpf);
@@ -180,7 +199,6 @@ int main() {
                                         printf("\n%s", alunos[quantAlunos].sexo);
                                         printf("\n%s", alunos[quantAlunos].emails);
                                         printf("\n%s", alunos[quantAlunos].telefones);*/
-                                        quantAlunos++;
                                     }
                                     else {
                                         printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
