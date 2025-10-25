@@ -2,7 +2,7 @@
 
 Esse projeto segue a proposta de um sistema backend que gerencia uma escola de cursos.
 
-> [!IMPORTANTE]
+> [!IMPORTANT]
 > Esse projeto ainda está em desenvolvimento!
 
 ### Dados dos alunos:
