@@ -1,4 +1,4 @@
-#:school_satchel: Gerenciamento de cursos
+# 🎒Gerenciamento de cursos
 
 Esse projeto segue a proposta de um sistema backend que gerencia uma escola de cursos.
 
