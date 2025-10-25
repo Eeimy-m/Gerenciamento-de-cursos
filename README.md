@@ -2,6 +2,9 @@
 
 Esse projeto segue a proposta de um sistema backend que gerencia uma escola de cursos.
 
+> [!IMPORTANTE]
+> Esse projeto ainda está em desenvolvimento!
+
 ### Dados dos alunos:
 
 CPF, nome, data de nascimento, sexo, e-mails e números de telefone.
