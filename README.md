@@ -1,20 +1,23 @@
-# Gerenciamento de cursos
+# 🎒Gerenciamento de cursos
 
 Esse projeto segue a proposta de um sistema backend que gerencia uma escola de cursos.
 
+> [!IMPORTANT]
+> Esse projeto ainda está em desenvolvimento!
+
 ### Dados dos alunos:
 
-    CPF, nome, data de nascimento, sexo, e-mails e números de telefone.
+CPF, nome, data de nascimento, sexo, e-mails e números de telefone.
 
-    O CPF é uma chave única, ou seja, o programa possui uma verificação que não permite o cadastro de um cpf que já se encontra no sistema.
+O CPF é uma chave única, ou seja, o programa possui uma verificação que não permite o cadastro de um cpf que já se encontra no sistema.
 
-    Essa verificação é feita na função de nome `<verificarCPF>`.
+Essa verificação é feita na função de nome `<verificarCPF>`.
 
 ### Dados dos cursos:
 
-    Código, carga horária, preço e descrição.
+Código, carga horária, preço e descrição.
 
-    O código funcionará igualmente ao cpf. A verificação é feita pela função `<verificarCodigo>`.
+O código funcionará igualmente ao cpf. A verificação é feita pela função `<verificarCodigo>`.
 
 ## Informações técnicas:
 
