@@ -59,28 +59,36 @@ int incluirAluno(struct aluno listaAlunos[], int quant) {
     printf("\nNome: ");
     getchar();
     fgets(listaAlunos[quant].nome, 40, stdin);
+    listaAlunos[quant].nome[strcspn(listaAlunos[quant].nome, "\n")] = '\0';
+    
     printf("\nData de nascimento (dd/mm/aaaa): ");
     scanf("%s", &listaAlunos[quant].dataNascimento);
+
     printf("\nSexo: ");
     getchar();
     scanf("%c", &listaAlunos[quant].sexo);
+
     printf("\nInforme a quantidade de e-mails a serem inseridos: ");
     scanf("%d", &quantEmails);
     printf("\nInsira a seguir o(s) e-mail(s) do aluno: ");
     for(i = 0; i < quantEmails; i++) {
         scanf("%s", &listaAlunos[quant].emails[i]);
     }
+
     printf("\n");
     printf("\ne-mail(s) inserido(s) com sucesso.");
     printf("\n");
     printf("\nInforme a quantidade de números telefônicos: ");
+
     scanf("%d", &quantTelefones);
     printf("\nInsira a seguir o(s) telefone(s): ");
     for(i = 0; i < quantTelefones; i++) {
         scanf("%s", &listaAlunos[quant].telefones[i]);
     }
+
     printf("Telefone(s) inserido(s) com sucesso.");
     printf("\n");
+
     return 1;
 }
 
