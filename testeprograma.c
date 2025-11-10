@@ -114,7 +114,6 @@ int incluirAluno(struct aluno listaAlunos[], int *quant) {
     printf("Telefone(s) inserido(s) com sucesso.");
     printf("\n");
     
-     printf("\nNome: %s", listaAlunos[*quant].nome);
     (*quant)++;
     return 1;
 }
@@ -169,6 +168,19 @@ void submenu(int *opcao) {
     printf("\n=============================");
     printf("\n");
     printf("\nSelecione uma das opções acima: ");
+    scanf("%d", opcao);
+}
+
+void submenuAlterar(int *opcao) {
+    printf("\n=============================");
+    printf("\n1- Nome");
+    printf("\n2- data de nascimento");
+    printf("\n3- Sexo");
+    printf("\n1- E-mail");
+    printf("\n1- Telefone");
+    printf("\n=============================");
+    printf("\n");
+    printf("\nSelecione uma das opções:");
     scanf("%d", opcao);
 }
 
@@ -256,7 +268,7 @@ void mainMenu() {
                             free(cpf); //liberar o locald a memória
                             resultado = incluirAluno(alunos, &quantAlunos);
                             if(resultado == 1) { //feedback
-                                //system("clear||cls");
+                                system("clear||cls");
 
                                 printf("\n=============================");
                                 printf("\nAluno adicionado ao sistema com sucesso!");
@@ -272,7 +284,29 @@ void mainMenu() {
                         }
                         break;
                     case 4:
-                        printf("\nVoce selecionou 4");
+                        printf("\nInforme o cpf do aluno:");
+                        scanf("%s", cpf);
+                        printf("\n");
+                        printf("\n=============================");
+                        printf("\n1- Alterar");
+                        printf("\n2- Excluir");
+                        printf("\n=============================");
+                        printf("\n");
+                        printf("\nSelecione uma das opções acima: ");
+                        scanf("%d", &opcao);
+                        posicao = verificarCPF(alunos, cpf, quantAlunos);
+                        if(opcao == 1) {
+                            submenuAlterar(&opcao);
+                        }
+                        else if(opcao == 2) {
+                            printf("\nAluno removido do sistema com sucesso!");
+                        }
+                        else {
+                            printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                            printf("\nA opção inserida não é válida, tente novamente.");
+                            printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                        }
+                        break;
                     default:
                         system("clear||cls");
                         printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
