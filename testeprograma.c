@@ -82,10 +82,9 @@ void leituraDeArquivos() { //Lê os dados de arquivo texto e imprime
 }
 
 int incluirAluno(struct aluno listaAlunos[], int *quant) {
-    int quantEmails = 0, i, quantTelefones = 0;
+    int i;
     printf("\nNome: ");
-    getchar();
-    fgets(listaAlunos[*quant].nome, 40, stdin);
+    fgets(listaAlunos[*quant].nome, sizeof listaAlunos[*quant].nome, stdin);
     listaAlunos[*quant].nome[strcspn(listaAlunos[*quant].nome, "\n")] = '\0';
 
     printf("\nData de nascimento (dd/mm/aaaa): ");
@@ -114,8 +113,8 @@ int incluirAluno(struct aluno listaAlunos[], int *quant) {
 
     printf("Telefone(s) inserido(s) com sucesso.");
     printf("\n");
-
-    printf("\nData de nascimento: %s", listaAlunos[*quant].dataNascimento);
+    
+     printf("\nNome: %s", listaAlunos[*quant].nome);
     (*quant)++;
     return 1;
 }
@@ -257,7 +256,7 @@ void mainMenu() {
                             free(cpf); //liberar o locald a memória
                             resultado = incluirAluno(alunos, &quantAlunos);
                             if(resultado == 1) { //feedback
-                                system("clear||cls");
+                                //system("clear||cls");
 
                                 printf("\n=============================");
                                 printf("\nAluno adicionado ao sistema com sucesso!");
