@@ -3,7 +3,8 @@
 #include<string.h>
 
 struct aluno {
-    char nome[40], dataNascimento[10], sexo, emails[10][40], telefones[10][14], cpf[14]; //CPF é único por aluno 
+    char nome[40], dataNascimento[11], sexo, emails[10][40], telefones[10][14], cpf[14]; //CPF é único por aluno 
+    int quantTelefones, quantEmails;
     //int quantEmails, quantTelefones;
 };
 
@@ -17,6 +18,69 @@ struct matricula {//Não pode existir mais de um mesmo cpf com um mesmo código 
     char codigoCurso[10], dataInicio, dataFim, cpfAluno[14];
 };
 
+void imprimirAluno(struct aluno listaAlunos[], int n) {
+    int i;
+    printf("\n=============================");
+    printf("\nNome: %s", listaAlunos[n].nome);
+    printf("\n");
+    printf("\nCPF: %s", listaAlunos[n].cpf);
+    printf("\n");
+    printf("\nData de nascimento: %s", listaAlunos[n].dataNascimento);
+    printf("\n");
+    printf("\nSexo: %c", listaAlunos[n].sexo);
+    printf("\n");
+    printf("\nNúmeros telefônicos:");
+    for(i = 0; i < listaAlunos[n].quantTelefones; i++) {
+        printf("\n%s", listaAlunos[n].telefones[i]);
+    }
+    printf("\n");
+    printf("\nE-mails: ");
+    for(i = 0; i < listaAlunos[n].quantEmails; i++) {
+        printf("\n%s", listaAlunos[n].emails[i]);
+    }
+    printf("\n=============================");
+    printf("\n");
+}
+
+void inserirEmArqCursos(struct curso cursos[], int quant) {
+    FILE *arq;
+    arq = fopen("alunos.dat", "ab"); //insere ao fim do arquivo
+    if(arq == NULL) {
+        printf("Não foi possível abrir o arquivo.");
+        exit(0);
+    }
+    if((fwrite(&cursos[quant], sizeof(struct aluno), 1, arq)) != 1) {
+        printf("\nErro na escrita");
+        exit(0);
+    } 
+}
+
+void inserirEmArqAlunos(struct aluno alunos[], int quant) {
+    FILE *arq;
+    arq = fopen("alunos.dat", "ab");
+    if(arq == NULL) {
+        printf("Não foi possível abrir o arquivo.");
+        exit(0);
+    }
+    if((fwrite(&alunos[quant], sizeof(struct aluno), 1, arq)) != 1) {
+        printf("\nErro na escrita");
+        exit(0);
+    } 
+}
+
+void leituraDeArquivos() { //Lê os dados de arquivo texto e imprime
+    FILE *arq;
+    char c;
+    arq = fopen("cursos.dat", "r"); //apenas conlúi a ação se o arquivo existir
+    if(arq == NULL) {
+        arq = fopen("cursos.dat", "w+"); //caso o arquivo não exista, ele será criado
+    }
+    while((c = fgetc(arq)) != EOF) {
+        printf("%c", c);
+    }
+    fclose(arq);
+}
+
 int incluirAluno(struct aluno listaAlunos[], int *quant) {
     int quantEmails = 0, i, quantTelefones = 0;
     printf("\nNome: ");
@@ -25,16 +89,16 @@ int incluirAluno(struct aluno listaAlunos[], int *quant) {
     listaAlunos[*quant].nome[strcspn(listaAlunos[*quant].nome, "\n")] = '\0';
 
     printf("\nData de nascimento (dd/mm/aaaa): ");
-    scanf("%s", &listaAlunos[*quant].dataNascimento);
+    scanf("%10s", listaAlunos[*quant].dataNascimento);
 
     printf("\nSexo: ");
     getchar();
     scanf("%c", &listaAlunos[*quant].sexo);
 
     printf("\nInforme a quantidade de e-mails a serem inseridos: ");
-    scanf("%d", &quantEmails);
+    scanf("%d", &listaAlunos[*quant].quantEmails);
     printf("\nInsira a seguir o(s) e-mail(s) do aluno: ");
-    for(i = 0; i < quantEmails; i++) {
+    for(i = 0; i < listaAlunos[*quant].quantEmails; i++) {
         scanf("%s", &listaAlunos[*quant].emails[i]);
     }
     printf("\n");
@@ -42,15 +106,16 @@ int incluirAluno(struct aluno listaAlunos[], int *quant) {
     printf("\n");
 
     printf("\nInforme a quantidade de números telefônicos: ");
-    scanf("%d", &quantTelefones);
+    scanf("%d", &listaAlunos[*quant].quantTelefones);
     printf("\nInsira a seguir o(s) telefone(s): ");
-    for(i = 0; i < quantTelefones; i++) {
+    for(i = 0; i < listaAlunos[*quant].quantTelefones; i++) {
         scanf("%s", &listaAlunos[*quant].telefones[i]);
     }
 
     printf("Telefone(s) inserido(s) com sucesso.");
     printf("\n");
 
+    printf("\nData de nascimento: %s", listaAlunos[*quant].dataNascimento);
     (*quant)++;
     return 1;
 }
@@ -120,21 +185,8 @@ void submenuRelatorios(int *opcao) {
     scanf("%d", opcao);
 }
 
-void leituraDeArquivos() { //Lê os dados de arquivo texto e imprime
-    FILE *arqCursos;
-    char c;
-    arqCursos = fopen("cursos.txt", "r");
-    if(arqCursos == NULL) {
-        arqCursos = fopen("cursos.txt", "w+"); //caso o arquivo não exista, ele será criado
-    }
-    while((c = fgetc(arqCursos)) != EOF) {
-        printf("%c", c);
-    }
-    fclose(arqCursos);
-}
-
 void mainMenu() {
-    int opcao, limiteAlunos = 100, limiteCursos = 50, quantAlunos = 0, quantCursos = 0, resultado;
+    int opcao, limiteAlunos = 100, limiteCursos = 50, quantAlunos = 0, quantCursos = 0, resultado, posicao;
     char *cpf, *codigo;
 
     struct aluno *alunos; 
@@ -157,15 +209,22 @@ void mainMenu() {
         scanf("%d", &opcao);
 
         if(opcao == 1) {
-            if(alunos != NULL) {
+            cpf = (char *) malloc(sizeof (char) * 16); 
+            if(alunos != NULL && cpf != NULL) {
                 printf("\n=============================");
                 printf("\nSubmenu de Alunos");
                 submenu(&opcao);
                 switch (opcao) {
                     case 1:
-                        printf("\nVocê selecionou 1"); //Placeholder 
+                        system("clear||cls");
+                        printf("\n=============================");
+                        printf("\nTodos os alunos cadastrados"); 
                     case 2:
-                        printf("\nVoce selecionou 2");
+                        printf("\nInforme o cpf do aluno:");
+                        scanf("%s", cpf);
+                        posicao = verificarCPF(alunos, cpf, quantAlunos);
+                        imprimirAluno(alunos, posicao);
+                        break;
                     case 3:
                         system("clear||cls");
 
@@ -173,8 +232,8 @@ void mainMenu() {
                         printf("\n");
                         printf("\nInforme o CPF do aluno: ");
 
-                        cpf = (char *) malloc(sizeof (char) * 16); 
-                        if(cpf != NULL) {
+                        //cpf = (char *) malloc(sizeof (char) * 16); 
+                        //if(cpf != NULL) {
                             getchar();
                             fgets(cpf, 15, stdin);
                             cpf[strcspn(cpf, "\n")] = '\0';
@@ -203,10 +262,11 @@ void mainMenu() {
                                     printf("\n");
                                 }
                             }
-                        } 
-                        else {
+                        //} 
+                        /*else {
                             printf("\nMemória indisponível.");
-                        }
+                        }*/
+
                         break;
                     case 4:
                         printf("\nVoce selecionou 4");
