@@ -186,7 +186,7 @@ void submenuRelatorios(int *opcao) {
 }
 
 void mainMenu() {
-    int opcao, limiteAlunos = 100, limiteCursos = 50, quantAlunos = 0, quantCursos = 0, resultado, posicao;
+    int opcao, limiteAlunos = 100, limiteCursos = 50, quantAlunos = 0, quantCursos = 0, resultado, posicao, i;
     char *cpf, *codigo;
 
     struct aluno *alunos; 
@@ -219,6 +219,10 @@ void mainMenu() {
                         system("clear||cls");
                         printf("\n=============================");
                         printf("\nTodos os alunos cadastrados"); 
+                        for(i = 0; i < quantAlunos; i++) {
+                            imprimirAluno(alunos, i);
+                        }
+                        break;
                     case 2:
                         printf("\nInforme o cpf do aluno:");
                         scanf("%s", cpf);
