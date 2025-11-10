@@ -223,7 +223,14 @@ void mainMenu() {
                         printf("\nInforme o cpf do aluno:");
                         scanf("%s", cpf);
                         posicao = verificarCPF(alunos, cpf, quantAlunos);
-                        imprimirAluno(alunos, posicao);
+                        if(posicao < 0) {
+                            printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                            printf("\nCPF não encontrado no sistema.");
+                            printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                        }
+                        else {
+                            imprimirAluno(alunos, posicao);
+                        }
                         break;
                     case 3:
                         system("clear||cls");
