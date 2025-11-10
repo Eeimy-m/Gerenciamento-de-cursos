@@ -239,41 +239,34 @@ void mainMenu() {
                         printf("\n");
                         printf("\nInforme o CPF do aluno: ");
 
-                        //cpf = (char *) malloc(sizeof (char) * 16); 
-                        //if(cpf != NULL) {
-                            getchar();
-                            fgets(cpf, 15, stdin);
-                            cpf[strcspn(cpf, "\n")] = '\0';
-                            if(verificarCPF(alunos, cpf, quantAlunos) >= 0) {
-                                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                                printf("\nO CPF inserido já existe no sistema.");
-                                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                        getchar();
+                        fgets(cpf, 15, stdin);
+                        cpf[strcspn(cpf, "\n")] = '\0';
+                        if(verificarCPF(alunos, cpf, quantAlunos) >= 0) {
+                            printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                            printf("\nO CPF inserido já existe no sistema.");
+                            printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                            printf("\n");
+                        }
+                        else {
+                            strcpy(alunos[quantAlunos].cpf, cpf);
+                            free(cpf); //liberar o locald a memória
+                            resultado = incluirAluno(alunos, &quantAlunos);
+                            if(resultado == 1) { //feedback
+                                system("clear||cls");
+
+                                printf("\n=============================");
+                                printf("\nAluno adicionado ao sistema com sucesso!");
+                                printf("\n=============================");
                                 printf("\n");
                             }
                             else {
-                                strcpy(alunos[quantAlunos].cpf, cpf);
-                                free(cpf); //liberar o locald a memória
-                                resultado = incluirAluno(alunos, &quantAlunos);
-                                if(resultado == 1) { //feedback
-                                    system("clear||cls");
-
-                                    printf("\n=============================");
-                                    printf("\nAluno adicionado ao sistema com sucesso!");
-                                    printf("\n=============================");
-                                    printf("\n");
-                                }
-                                else {
-                                    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                                    printf("\nNão foi possível adicionar o aluno ao sistema.");
-                                    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                                    printf("\n");
-                                }
+                                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                                printf("\nNão foi possível adicionar o aluno ao sistema.");
+                                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                                printf("\n");
                             }
-                        //} 
-                        /*else {
-                            printf("\nMemória indisponível.");
-                        }*/
-
+                        }
                         break;
                     case 4:
                         printf("\nVoce selecionou 4");
