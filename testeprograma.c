@@ -53,11 +53,12 @@ void inserirEmArqCursos(struct curso cursos[], int quant) {
         printf("\nErro na escrita");
         exit(0);
     } 
+    fclose(arq);
 }
 
-void inserirEmArqAlunos(struct aluno alunos[], int quant) {
+void inserirEmArqAlunos(struct aluno alunos[], int quant) { //quant está indicando a posição do elemento que vai ser gravado no arquivo
     FILE *arq;
-    arq = fopen("alunos.dat", "ab");
+    arq = fopen("alunos.dat", "ab"); //arq binário 
     if(arq == NULL) {
         printf("Não foi possível abrir o arquivo.");
         exit(0);
@@ -66,9 +67,27 @@ void inserirEmArqAlunos(struct aluno alunos[], int quant) {
         printf("\nErro na escrita");
         exit(0);
     } 
+    fclose(arq);
 }
 
-void leituraDeArquivos() { //Lê os dados de arquivo texto e imprime
+void inserirEmArqMatricula(struct matricula matriculas[], int quant) {
+
+}
+
+void leituraAlunos(struct curso cursos, int quant) {
+    FILE *arq;
+    arq = fopen("cursos.dat", "rb");
+    if(arq == NULL) {
+        printf("\nNão foi possível abrir o arquivo.");
+        exit(0);
+    }
+    if(fread(&cursos, sizeof(struct curso), quant, arq) != quant) {
+        printf("\nerro na leitura do arquivo.");
+        exit(0);
+    }
+}
+
+void leituraCursos() { //Lê os dados de arquivo texto e imprime
     FILE *arq;
     char c;
     arq = fopen("cursos.dat", "r"); //apenas conlúi a ação se o arquivo existir
@@ -197,14 +216,16 @@ void submenuRelatorios(int *opcao) {
 }
 
 void mainMenu() {
-    int opcao, limiteAlunos = 100, limiteCursos = 50, quantAlunos = 0, quantCursos = 0, resultado, posicao, i;
+    int opcao, limiteAlunos = 100, limiteCursos = 50, limiteMatriculas = 100, quantAlunos = 0, quantCursos = 0, resultado, posicao, i;
     char *cpf, *codigo;
 
     struct aluno *alunos; 
     struct curso *cursos;
+    struct matricula *matriculas;
 
-    alunos = (struct aluno *) malloc (limiteAlunos * sizeof(struct aluno));
+    alunos = (struct aluno*) malloc (limiteAlunos * sizeof(struct aluno));
     cursos = (struct curso*) malloc (limiteCursos * sizeof(struct curso));
+    matriculas = (struct matricula*) malloc (limiteMatriculas * sizeof(struct matricula));
 
     do {
         printf("\n=============================");
@@ -270,6 +291,8 @@ void mainMenu() {
                             if(resultado == 1) { //feedback
                                 system("clear||cls");
 
+                                inserirEmArqAlunos(alunos, quantAlunos);
+
                                 printf("\n=============================");
                                 printf("\nAluno adicionado ao sistema com sucesso!");
                                 printf("\n=============================");
@@ -299,7 +322,10 @@ void mainMenu() {
                             submenuAlterar(&opcao);
                         }
                         else if(opcao == 2) {
+                            printf("\n=============================");
                             printf("\nAluno removido do sistema com sucesso!");
+                            printf("\n=============================");
+                            printf("\n");
                         }
                         else {
                             printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
@@ -351,6 +377,9 @@ void mainMenu() {
 
                                 if(incluirCurso(cursos, &quantCursos) == 1) { //confirma se o processo de incluir foi terminado
                                     system("clear||cls");
+
+                                    inserirEmArqCursos(cursos, quantCursos);
+
                                     printf("\n=============================");
                                     printf("\nCurso cadastrado com sucesso!");
                                     printf("\n=============================");
@@ -384,12 +413,15 @@ void mainMenu() {
         }
     }
     while(opcao != 5);
-    if(opcao == 5) {
-    system("clear||cls");
-    printf("\n");
-    printf("\n=============================");
-    printf("\nEncerrando programa.");
-    printf("\n=============================");
+    if(opcao == 5) { 
+        system("clear||cls");
+        free(alunos);
+        free(cursos);
+
+        printf("\n");
+        printf("\n=============================");
+        printf("\nEncerrando programa.");
+        printf("\n=============================");
     }
 }
 
