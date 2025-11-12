@@ -100,6 +100,10 @@ void leituraCursos() { //Lê os dados de arquivo texto e imprime
     fclose(arq);
 }
 
+void excluir() {
+    
+}
+
 int incluirAluno(struct aluno listaAlunos[], int *quant) {
     int i;
     printf("\nNome: ");
@@ -215,6 +219,17 @@ void submenuRelatorios(int *opcao) {
     scanf("%d", opcao);
 }
 
+void submenuAlterarExcluir(int *opcao) {
+    printf("\n");
+    printf("\n=============================");
+    printf("\n1- Alterar");
+    printf("\n2- Excluir");
+    printf("\n=============================");
+    printf("\n");
+    printf("\nSelecione uma das opções acima: ");
+    scanf("%d", opcao);
+}
+
 void mainMenu() {
     int opcao, limiteAlunos = 100, limiteCursos = 50, limiteMatriculas = 100, quantAlunos = 0, quantCursos = 0, resultado, posicao, i;
     char *cpf, *codigo;
@@ -309,14 +324,7 @@ void mainMenu() {
                     case 4:
                         printf("\nInforme o cpf do aluno:");
                         scanf("%s", cpf);
-                        printf("\n");
-                        printf("\n=============================");
-                        printf("\n1- Alterar");
-                        printf("\n2- Excluir");
-                        printf("\n=============================");
-                        printf("\n");
-                        printf("\nSelecione uma das opções acima: ");
-                        scanf("%d", &opcao);
+                        submenuAlterarExcluir(&opcao);
                         posicao = verificarCPF(alunos, cpf, quantAlunos);
                         if(opcao == 1) {
                             submenuAlterar(&opcao);
@@ -388,7 +396,21 @@ void mainMenu() {
                             }
                         }
                         else {
-                            printf("\nmemória indisponível.");
+                            printf("\nInforme o código do curso:");
+                            scanf("%s", &codigo);
+                            submenuAlterarExcluir(&opcao);
+                            if(opcao == 1) {
+                                submenuAlterar(&opcao);
+                            }
+                            else if(opcao == 2) {
+                                printf("\n=============================");
+                                printf("\nCurso removido do sistema com sucesso!");
+                                printf("\n=============================");
+                                printf("\n");
+                            }
+                            else {
+                                printf("\nA opção inserida é inválida.");
+                            }
                         }
                     case 4:
                         printf("\nVoce selecionou 4");
