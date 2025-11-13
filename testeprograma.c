@@ -68,6 +68,34 @@ void imprimirAluno(struct aluno listaAlunos[], int n) {
     printf("\n");
 }
 
+void imprimirCurso(struct curso cursos[], int n) {
+    printf("\n=============================");
+    printf("\nCodigo: %s", cursos[n].codigo);
+    printf("\n");
+    printf("\nDescrição: %s", cursos[n].descricao);
+    printf("\n");
+    printf("Preço: %f", cursos[n].descricao);
+    printf("\n");
+    printf("\nCarga horária: %f", cursos[n].cargaHoraria);
+    printf("\n=============================");
+    printf("\n");
+}
+
+void imprimirMatricula(struct matricula matriculas[], int n) {
+    printf("\n=============================");
+    printf("\nCódigo: %s", matriculas[n].codigoCurso);
+    printf("\n");
+    printf("\nCPF do aluno: %s", matriculas[n].cpfAluno);
+    printf("\n");
+    printf("\nData de início: %s", matriculas[n].dataInicio);
+    printf("\n");
+    printf("\nData de conclusão: %s", matriculas[n].dataFim);
+    printf("\n");
+    printf("\nDesconto: %f", matriculas[n].desconto);
+    printf("\n=============================");
+    printf("\n");
+}
+
 void inserirEmArqCursos(struct curso cursos[], int quant) {
     FILE *arq;
     arq = fopen("alunos.dat", "ab"); //insere ao fim do arquivo
@@ -135,6 +163,7 @@ void excluir() {
 int incluirAluno(struct aluno listaAlunos[], int *quant) {
     int i;
     printf("\nNome: ");
+    getchar();
     fgets(listaAlunos[*quant].nome, sizeof listaAlunos[*quant].nome, stdin);
     listaAlunos[*quant].nome[strcspn(listaAlunos[*quant].nome, "\n")] = '\0';
 
@@ -181,6 +210,18 @@ int incluirCurso(struct curso listaCursos[], int *quantCursos) {
     return 1;
 }
 
+int incluirMatricula(struct matricula matriculas[], int *quant) {
+    //fazer verificação do código do curso e do cpf (se existem ou não e se já tem alguma matrícula igual)
+    printf("\nDesconto:");
+    scanf("%f", &matriculas[*quant].desconto);
+    printf("\nData de início: ");
+    scanf("%s", &matriculas[*quant].dataInicio);
+    printf("\nData de conclusão: ");
+    scanf("%s", &matriculas[*quant].dataFim);
+    (*quant)++;
+    return 1;
+}
+
 int verificarCPF(struct aluno listaAlunos[], char *cpf, int quantAlunos) { 
     int i, resultado; 
     if(quantAlunos == 0) {
@@ -209,6 +250,35 @@ int verificarCodigo(struct curso listaCursos[], char *codigo, int quantCursos) {
         }
         return -1;
     }
+}
+
+int verificarCodigoeCPFMatricula(struct matricula matriculas[], char *codigo, char *cpf, int quantMatriculas) {
+    int i, j, contadorCPF = 0, contadorCodigo = 0;
+    int posicoesCPF[contadorCPF];
+    int posicoesCodigo[contadorCodigo];
+
+    for(i = 0; i < quantMatriculas; i++) {
+        if(*codigo == matriculas[i].codigoCurso) {
+            posicoesCodigo[contadorCodigo] = i;
+            contadorCodigo++;
+        }
+    }
+
+    for(i = 0; i < quantMatriculas; i++) {
+        if(*cpf == matriculas[i].cpfAluno) {
+            posicoesCPF[contadorCPF] = i;
+            contadorCPF++;
+        }
+    }
+
+    for(i = 0; i < contadorCodigo; i++) { //se ambos ocupam o mesmo endereço na lista de structs de matrícula, significa que essa matrícula que se procura fazer já está feita
+        for(j = 0; j < contadorCPF; j++) {
+            if(posicoesCodigo[i] == posicoesCPF[j]) {
+                return i;
+            }
+        }
+    }
+    return 0;
 }
 
 void submenu(int *opcao) {
