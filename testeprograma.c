@@ -18,6 +18,32 @@ struct matricula {//Não pode existir mais de um mesmo cpf com um mesmo código 
     char codigoCurso[10], dataInicio, dataFim, cpfAluno[14];
 };
 
+int TamanhoArqu(FILE *arq, int limite) {
+    int quant;
+    long tamanho;
+    size_t tamTotal;
+
+    if(fseek(arq, 0, SEEK_END) != 0)  { //move o cursor para o final do arquivo
+        return -1; //indica que o arquivo está vazio
+    }
+    else {
+        tamanho = ftell(arq); //retorna o tamanho do arquivo em bytes
+        if(tamanho < 0) {
+
+            return -1;
+        }
+        tamTotal = (size_t) (tamanho / sizeof(struct aluno)); //tamTotal vai ter a quantidade de structs que o arquivo contém
+        if(tamTotal > limite) {
+            tamTotal = limite; //Não lê mais que o vetor pode armazenar
+            printf("%zu", tamTotal);
+            rewind(arq);
+            return tamTotal;
+        }
+        printf("%zu", tamTotal);
+        return tamTotal;
+    }
+}
+
 void imprimirAluno(struct aluno listaAlunos[], int n) {
     int i;
     printf("\n=============================");
@@ -74,34 +100,33 @@ void inserirEmArqMatricula(struct matricula matriculas[], int quant) {
 
 }
 
-void leituraAlunos(struct curso cursos, int quant) {
+void leituraAlunos(struct aluno alunos[], int limiteAlunos) {
     FILE *arq;
-    arq = fopen("cursos.dat", "rb");
+    size_t tamanhoArquivo;
+
+    arq = fopen("alunos.dat", "rb");
     if(arq == NULL) {
         printf("\nNão foi possível abrir o arquivo.");
+        fclose(arq);
         exit(0);
     }
-    if(fread(&cursos, sizeof(struct curso), quant, arq) != quant) {
-        printf("\nerro na leitura do arquivo.");
+
+    tamanhoArquivo = TamanhoArqu(arq, limiteAlunos);
+    rewind(arq);
+
+    if(fread(alunos, sizeof(struct aluno), tamanhoArquivo, arq) != tamanhoArquivo) {
+        printf("\nErro na leitura do arquivo.");
+        fclose(arq);
         exit(0);
     }
 }
 
-void leituraCursos() { //Lê os dados de arquivo texto e imprime
+void leituraCursos(struct curso cursos, int limiteCursos) { //Lê os dados de arquivo texto e imprime
     FILE *arq;
-    char c;
-    arq = fopen("cursos.dat", "r"); //apenas conlúi a ação se o arquivo existir
-    if(arq == NULL) {
-        arq = fopen("cursos.dat", "w+"); //caso o arquivo não exista, ele será criado
-    }
-    while((c = fgetc(arq)) != EOF) {
-        printf("%c", c);
-    }
-    fclose(arq);
 }
 
 void excluir() {
-    
+
 }
 
 int incluirAluno(struct aluno listaAlunos[], int *quant) {
@@ -231,7 +256,8 @@ void submenuAlterarExcluir(int *opcao) {
 }
 
 void mainMenu() {
-    int opcao, limiteAlunos = 100, limiteCursos = 50, limiteMatriculas = 100, quantAlunos = 0, quantCursos = 0, resultado, posicao, i;
+    int opcao, quantAlunos = 0, quantCursos = 0, resultado, posicao, i;
+    int limiteAlunos = 100, limiteCursos = 50, limiteMatriculas = 100;
     char *cpf, *codigo;
 
     struct aluno *alunos; 
@@ -258,6 +284,9 @@ void mainMenu() {
         if(opcao == 1) {
             cpf = (char *) malloc(sizeof (char) * 16); 
             if(alunos != NULL && cpf != NULL) {
+                if(quantAlunos == 0) {
+                    leituraAlunos(alunos, limiteAlunos);
+                }
                 printf("\n=============================");
                 printf("\nSubmenu de Alunos");
                 submenu(&opcao);
@@ -414,6 +443,12 @@ void mainMenu() {
                         }
                     case 4:
                         printf("\nVoce selecionou 4");
+                    default:
+                        system("clear||cls");
+                        printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                        printf("\nA opção inserida não é válida, tente novamente.");
+                        printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                        printf("\n");
                 }
             }
             else {
@@ -424,9 +459,29 @@ void mainMenu() {
             }
         }
         else if(opcao == 3) {
-            printf("\n=============================");
-            printf("Submenu de Matrícula");
-            submenu(&opcao);
+            if(matriculas != NULL) {
+                printf("\n=============================");
+                printf("Submenu de Matrícula");
+                submenu(&opcao);
+                switch(opcao) {
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                    default:
+                        system("clear||cls");
+                        printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                        printf("\nA opção inserida não é válida, tente novamente.");
+                        printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                        printf("\n");
+                }
+            }
+            else {
+                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                printf("\nMemória insuficiente");
+                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                printf("\n");
+            }
         }
         else if(opcao == 4) {
             printf("\n=============================");
