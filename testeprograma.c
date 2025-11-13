@@ -100,9 +100,9 @@ void inserirEmArqMatricula(struct matricula matriculas[], int quant) {
 
 }
 
-void leituraAlunos(struct aluno alunos[], int limiteAlunos) {
+void leituraAlunos(struct aluno alunos[], int limiteAlunos, int*quantAlunos) {
     FILE *arq;
-    size_t tamanhoArquivo;
+    size_t tamanhoArquivo, lidos;
 
     arq = fopen("alunos.dat", "rb");
     if(arq == NULL) {
@@ -113,12 +113,15 @@ void leituraAlunos(struct aluno alunos[], int limiteAlunos) {
 
     tamanhoArquivo = TamanhoArqu(arq, limiteAlunos);
     rewind(arq);
+    lidos = fread(alunos, sizeof(struct aluno), tamanhoArquivo, arq);
 
-    if(fread(alunos, sizeof(struct aluno), tamanhoArquivo, arq) != tamanhoArquivo) {
+    if(lidos != tamanhoArquivo) {
         printf("\nErro na leitura do arquivo.");
         fclose(arq);
         exit(0);
     }
+
+    *quantAlunos = (int) lidos;
 }
 
 void leituraCursos(struct curso cursos, int limiteCursos) { //Lê os dados de arquivo texto e imprime
@@ -285,7 +288,7 @@ void mainMenu() {
             cpf = (char *) malloc(sizeof (char) * 16); 
             if(alunos != NULL && cpf != NULL) {
                 if(quantAlunos == 0) {
-                    leituraAlunos(alunos, limiteAlunos);
+                    leituraAlunos(alunos, limiteAlunos, &quantAlunos);
                 }
                 printf("\n=============================");
                 printf("\nSubmenu de Alunos");
