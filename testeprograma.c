@@ -258,8 +258,24 @@ void submenuAlterarExcluir(int *opcao) {
     scanf("%d", opcao);
 }
 
+void ImprimirMensagemDeErro() {
+    system("clear||cls");
+    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    printf("\nA opção inserida não é válida, tente novamente.");
+    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    printf("\n");
+}
+
+void MensagemErroAloca() {
+    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    printf("\nMemória insuficiente");
+    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    printf("\n");
+}
+
 void mainMenu() {
-    int opcao, quantAlunos = 0, quantCursos = 0, resultado, posicao, i;
+    int opcao, opcaoSubmenu, opcaoAlterarExcluir, opcaoSubmenuAlterar;
+    int quantAlunos = 0, quantCursos = 0, resultado, posicao, i;
     int limiteAlunos = 100, limiteCursos = 50, limiteMatriculas = 100;
     char *cpf, *codigo;
 
@@ -292,8 +308,8 @@ void mainMenu() {
                 }
                 printf("\n=============================");
                 printf("\nSubmenu de Alunos");
-                submenu(&opcao);
-                switch (opcao) {
+                submenu(&opcaoSubmenu);
+                switch (opcaoSubmenu) {
                     case 1:
                         system("clear||cls");
                         printf("\n=============================");
@@ -356,12 +372,12 @@ void mainMenu() {
                     case 4:
                         printf("\nInforme o cpf do aluno:");
                         scanf("%s", cpf);
-                        submenuAlterarExcluir(&opcao);
+                        submenuAlterarExcluir(&opcaoAlterarExcluir);
                         posicao = verificarCPF(alunos, cpf, quantAlunos);
-                        if(opcao == 1) {
-                            submenuAlterar(&opcao);
+                        if(opcaoAlterarExcluir == 1) {
+                            submenuAlterar(&opcaoSubmenuAlterar);
                         }
-                        else if(opcao == 2) {
+                        else if(opcaoAlterarExcluir == 2) {
                             printf("\n=============================");
                             printf("\nAluno removido do sistema com sucesso!");
                             printf("\n=============================");
@@ -374,32 +390,28 @@ void mainMenu() {
                         }
                         break;
                     default:
-                        system("clear||cls");
-                        printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                        printf("\nA opção inserida não é válida, tente novamente.");
-                        printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                        printf("\n");
+                        ImprimirMensagemDeErro();
+                        break;
                 }
             }
             else {
-                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                printf("\nMemória insuficiente");
-                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                printf("\n");
+                MensagemErroAloca();
             }
         }
         else if(opcao == 2) {
             if(cursos != NULL) {
                 printf("\n=============================");
                 printf("\nSubmenu de Cursos:");
-                submenu(&opcao);
-                switch (opcao) {
+                submenu(&opcaoSubmenu);
+                switch (opcaoSubmenu) {
                     case 1:
                         printf("\n=============================");
                         printf("\nDados de todos os cursos");
                         printf("\n");
+                        break;
                     case 2:
                         printf("\nVoce selecionou 2");
+                        break;
                     case 3:
                         printf("\nInsira o código do curso a ser inserido no sistema: ");
                         codigo = (char *) malloc(sizeof(char) * 12);
@@ -430,11 +442,11 @@ void mainMenu() {
                         else {
                             printf("\nInforme o código do curso:");
                             scanf("%s", &codigo);
-                            submenuAlterarExcluir(&opcao);
-                            if(opcao == 1) {
-                                submenuAlterar(&opcao);
+                            submenuAlterarExcluir(&opcaoAlterarExcluir);
+                            if(opcaoAlterarExcluir == 1) {
+                                submenuAlterar(&opcaoSubmenuAlterar);
                             }
-                            else if(opcao == 2) {
+                            else if(opcaoAlterarExcluir == 2) {
                                 printf("\n=============================");
                                 printf("\nCurso removido do sistema com sucesso!");
                                 printf("\n=============================");
@@ -444,52 +456,44 @@ void mainMenu() {
                                 printf("\nA opção inserida é inválida.");
                             }
                         }
+                        break;
                     case 4:
                         printf("\nVoce selecionou 4");
+                        break;
                     default:
-                        system("clear||cls");
-                        printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                        printf("\nA opção inserida não é válida, tente novamente.");
-                        printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                        printf("\n");
+                        ImprimirMensagemDeErro();
+                        break;
                 }
             }
             else {
-                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                printf("\nMemória insuficiente");
-                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                printf("\n");
+                MensagemErroAloca();
             }
         }
         else if(opcao == 3) {
             if(matriculas != NULL) {
                 printf("\n=============================");
                 printf("Submenu de Matrícula");
-                submenu(&opcao);
-                switch(opcao) {
+                submenu(&opcaoSubmenu);
+                switch(opcaoSubmenu) {
                     case 1:
                     case 2:
                     case 3:
                     case 4:
                     default:
-                        system("clear||cls");
-                        printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                        printf("\nA opção inserida não é válida, tente novamente.");
-                        printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                        printf("\n");
+                        ImprimirMensagemDeErro();
                 }
             }
             else {
-                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                printf("\nMemória insuficiente");
-                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                printf("\n");
+                MensagemErroAloca();
             }
         }
         else if(opcao == 4) {
             printf("\n=============================");
             printf("Submenu de Relatórios");
             submenuRelatorios(&opcao);
+        }
+        else {
+            ImprimirMensagemDeErro();
         }
     }
     while(opcao != 5);
