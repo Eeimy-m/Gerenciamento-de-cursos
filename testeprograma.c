@@ -5,7 +5,6 @@
 struct aluno {
     char nome[40], dataNascimento[11], sexo, emails[10][40], telefones[10][14], cpf[14]; //CPF é único por aluno 
     int quantTelefones, quantEmails;
-    //int quantEmails, quantTelefones;
 };
 
 struct curso {
@@ -17,6 +16,13 @@ struct matricula {//Não pode existir mais de um mesmo cpf com um mesmo código 
     float desconto;
     char codigoCurso[10], dataInicio, dataFim, cpfAluno[14];
 };
+
+void MensagemErroAloca() {
+    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    printf("\nMemória insuficiente");
+    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    printf("\n");
+}
 
 int TamanhoArqu(FILE *arq, int limite) {
     int quant;
@@ -33,12 +39,6 @@ int TamanhoArqu(FILE *arq, int limite) {
             return -1;
         }
         tamTotal = (size_t) (tamanho / sizeof(struct aluno)); //tamTotal vai ter a quantidade de structs que o arquivo contém
-        if(tamTotal > limite) {
-            tamTotal = limite; //Não lê mais que o vetor pode armazenar
-            printf("%zu", tamTotal);
-            rewind(arq);
-            return tamTotal;
-        }
         printf("%zu", tamTotal);
         return tamTotal;
     }
@@ -117,7 +117,7 @@ void inserirEmArqAlunos(struct aluno alunos[], int quant) { //quant está indica
         printf("Não foi possível abrir o arquivo.");
         exit(0);
     }
-    if((fwrite(&alunos[quant], sizeof(struct aluno), 1, arq)) != 1) {
+    if((fwrite(alunos, sizeof(struct aluno), quant, arq)) != quant) {
         printf("\nErro na escrita");
         exit(0);
     } 
@@ -128,11 +128,12 @@ void inserirEmArqMatricula(struct matricula matriculas[], int quant) {
 
 }
 
-void leituraAlunos(struct aluno alunos[], int limiteAlunos, int*quantAlunos) {
+struct aluno *leituraAlunos(int limiteAlunos, int *quantAlunos) {
     FILE *arq;
     size_t tamanhoArquivo, lidos;
+    struct aluno *alunos;
 
-    arq = fopen("alunos.dat", "rb");
+    arq = fopen("alunos.dat", "ab+");
     if(arq == NULL) {
         printf("\nNão foi possível abrir o arquivo.");
         fclose(arq);
@@ -140,16 +141,25 @@ void leituraAlunos(struct aluno alunos[], int limiteAlunos, int*quantAlunos) {
     }
 
     tamanhoArquivo = TamanhoArqu(arq, limiteAlunos);
+    alunos = (struct aluno*) malloc ((limiteAlunos * sizeof(struct aluno)) + (int) tamanhoArquivo);
+
     rewind(arq);
-    lidos = fread(alunos, sizeof(struct aluno), tamanhoArquivo, arq);
+    lidos = fread(alunos, sizeof(struct aluno), tamanhoArquivo, arq); 
+
+    if(alunos == NULL) {
+        MensagemErroAloca();
+    }
+    printf("%zu", lidos);
 
     if(lidos != tamanhoArquivo) {
         printf("\nErro na leitura do arquivo.");
+        system("pause");
         fclose(arq);
         exit(0);
     }
 
     *quantAlunos = (int) lidos;
+    return alunos;
 }
 
 void leituraCursos(struct curso cursos, int limiteCursos) { //Lê os dados de arquivo texto e imprime
@@ -160,7 +170,7 @@ void excluir() {
 
 }
 
-int incluirAluno(struct aluno listaAlunos[], int *quant) {
+int incluirAluno(struct aluno *listaAlunos, int *quant) {
     int i;
     printf("\nNome: ");
     getchar();
@@ -168,10 +178,10 @@ int incluirAluno(struct aluno listaAlunos[], int *quant) {
     listaAlunos[*quant].nome[strcspn(listaAlunos[*quant].nome, "\n")] = '\0';
 
     printf("\nData de nascimento (dd/mm/aaaa): ");
-    scanf("%10s", listaAlunos[*quant].dataNascimento);
+    scanf("%10s", &listaAlunos[*quant].dataNascimento);
 
-    printf("\nSexo: ");
     getchar();
+    printf("\nSexo: ");
     scanf("%c", &listaAlunos[*quant].sexo);
 
     printf("\nInforme a quantidade de e-mails a serem inseridos: ");
@@ -194,6 +204,10 @@ int incluirAluno(struct aluno listaAlunos[], int *quant) {
     printf("Telefone(s) inserido(s) com sucesso.");
     printf("\n");
     
+    printf("\n%s", listaAlunos[*quant].cpf);
+    printf("\n%s", listaAlunos[*quant].nome);
+    printf("\n%s", listaAlunos[*quant].dataNascimento);
+
     (*quant)++;
     return 1;
 }
@@ -257,28 +271,34 @@ int verificarCodigoeCPFMatricula(struct matricula matriculas[], char *codigo, ch
     int posicoesCPF[contadorCPF];
     int posicoesCodigo[contadorCodigo];
 
-    for(i = 0; i < quantMatriculas; i++) {
+    if(quantMatriculas == 0) {
+        return -1;
+    }
+
+    else {
+        for(i = 0; i < quantMatriculas; i++) {
         if(codigo == matriculas[i].codigoCurso) {
             posicoesCodigo[contadorCodigo] = i;
             contadorCodigo++;
         }
-    }
-
-    for(i = 0; i < quantMatriculas; i++) {
-        if(cpf == matriculas[i].cpfAluno) {
-            posicoesCPF[contadorCPF] = i;
-            contadorCPF++;
         }
-    }
 
-    for(i = 0; i < contadorCodigo; i++) { //ocupam o mesmo endereço na lista de structs de matrícula = essa matrícula já existe
-        for(j = 0; j < contadorCPF; j++) {
-            if(posicoesCodigo[i] == posicoesCPF[j]) {
-                return i;
+        for(i = 0; i < quantMatriculas; i++) {
+            if(cpf == matriculas[i].cpfAluno) {
+                posicoesCPF[contadorCPF] = i;
+                contadorCPF++;
             }
         }
-    }
-    return -1; 
+
+        for(i = 0; i < contadorCodigo; i++) { //ocupam o mesmo endereço na lista de structs de matrícula = essa matrícula já existe
+            for(j = 0; j < contadorCPF; j++) {
+                if(posicoesCodigo[i] == posicoesCPF[j]) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    } 
 }
 
 void submenu(int *opcao) {
@@ -336,13 +356,6 @@ void ImprimirMensagemDeErro() {
     printf("\n");
 }
 
-void MensagemErroAloca() {
-    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-    printf("\nMemória insuficiente");
-    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-    printf("\n");
-}
-
 void MensagemErroCadastro() {
     printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     printf("\nNão foi possível concluir o cadastro.");
@@ -350,20 +363,276 @@ void MensagemErroCadastro() {
     printf("\n");
 }
 
+void submenuAlunos(struct aluno alunos[], char *cpf, int *quantAlunos) {
+    int opcao, posicao, resultado, i;
+    int quant = *quantAlunos;
+
+    printf("\n=============================");
+    printf("\nSubmenu de Alunos");
+    submenu(&opcao);
+    switch (opcao) {
+        case 1:
+            system("clear||cls");
+            printf("\n=============================");
+            printf("\nTodos os alunos cadastrados"); 
+            for(i = 0; i < *quantAlunos; i++) {
+                imprimirAluno(alunos, i);
+            }
+            break;
+        case 2:
+            printf("\nInforme o cpf do aluno:");
+            getchar();
+            fgets(cpf, 15, stdin);
+            cpf[strcspn(cpf, "\n")] = '\0';
+
+            posicao = verificarCPF(alunos, cpf, quant);
+            if(posicao < 0) {
+                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                printf("\nCPF não encontrado no sistema.");
+                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            }
+            else {
+                imprimirAluno(alunos, posicao);
+            }
+            break;
+        case 3:
+            system("clear||cls");
+
+            printf("\nIncluindo aluno no sistema...");
+            printf("\n");
+            printf("\nInforme o CPF do aluno: ");
+
+            getchar();
+            fgets(cpf, 15, stdin);
+            cpf[strcspn(cpf, "\n")] = '\0';
+
+            if(verificarCPF(alunos, cpf, quant) >= 0) {
+                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                printf("\nO CPF inserido já existe no sistema.");
+                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                printf("\n");
+            }
+            else {
+                strcpy(alunos[*quantAlunos].cpf, cpf);
+                free(cpf); //liberar o locald a memória
+                resultado = incluirAluno(alunos, quantAlunos); //quantAlunos contém o endereço de memória pro local onde aponta
+
+                if(resultado == 1) { //feedback
+                    system("clear||cls");
+
+                    printf("\n=============================");
+                    printf("\nAluno adicionado ao sistema com sucesso!");
+                    printf("\n=============================");
+                    printf("\n");
+                }
+                else {
+                    MensagemErroCadastro();
+                }
+            }
+            break;
+        case 4:
+            printf("\nInforme o cpf do aluno:");
+            scanf("%s", cpf);
+            submenuAlterarExcluir(&opcao);
+            posicao = verificarCPF(alunos, cpf, quant);
+            if(opcao == 1) {
+                submenuAlterar(&opcao);
+            }
+            else if(opcao == 2) {
+                printf("\n=============================");
+                printf("\nAluno removido do sistema com sucesso!");
+                printf("\n=============================");
+                printf("\n");
+            }
+            else {
+                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                printf("\nA opção inserida não é válida, tente novamente.");
+                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            }
+            break;
+        default:
+            ImprimirMensagemDeErro();
+            break;
+    }
+}
+
+void submenuCursos(struct curso cursos[]) {
+    int opcao, quantCursos;
+    char *codigo;
+
+    if(cursos != NULL) {
+        printf("\n=============================");
+        printf("\nSubmenu de Cursos:");
+        submenu(&opcao);
+        switch (opcao) {
+            case 1:
+                printf("\n=============================");
+                printf("\nDados de todos os cursos");
+                printf("\n");
+                break;
+            case 2:
+                printf("\nVoce selecionou 2");
+                break;
+            case 3:
+                printf("\nInsira o código do curso a ser inserido no sistema: ");
+                if(codigo != NULL) {
+                    scanf("%s", codigo);   
+                    
+                    if(verificarCodigo(cursos, codigo, quantCursos) >= 0) {
+                        printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                        printf("\nO código inserido já existe no sistema.");
+                        printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                        printf("\n");
+                    }
+                    else {
+                        strcpy(cursos[quantCursos].codigo, codigo);
+
+                        if(incluirCurso(cursos, &quantCursos) == 1) { //confirma se o processo de incluir foi terminado
+                            system("clear||cls");
+
+                            inserirEmArqCursos(cursos, quantCursos);
+
+                            printf("\n=============================");
+                            printf("\nCurso cadastrado com sucesso!");
+                            printf("\n=============================");
+                            printf("\n");
+                        }
+
+                        else {
+                            MensagemErroCadastro();
+                        }
+                    }
+                }
+                else {
+                    printf("\nInforme o código do curso:");
+                    scanf("%s", &codigo);
+                    submenuAlterarExcluir(&opcao);
+                    if(opcao == 1) {
+                        submenuAlterar(&opcao);
+                    }
+                    else if(opcao == 2) {
+                        printf("\n=============================");
+                        printf("\nCurso removido do sistema com sucesso!");
+                        printf("\n=============================");
+                        printf("\n");
+                    }
+                    else {
+                        printf("\nA opção inserida é inválida.");
+                    }
+                }
+                break;
+            case 4:
+                printf("\nVoce selecionou 4");
+                break;
+            default:
+                ImprimirMensagemDeErro();
+                break;
+        }
+    }
+    else {
+        MensagemErroAloca();
+    }
+}
+
+void submenuMatricula(struct matricula matriculas[], struct aluno alunos[], struct curso cursos[]) {
+    int opcao, quantMatriculas = 0, quantAlunos = 0, quantCursos = 0, i, posicao, resultado;
+    char *cpf, *codigo;
+
+    if(matriculas != NULL && cpf != NULL && codigo != NULL) {
+        printf("\n=============================");
+        printf("\nSubmenu de Matrícula");
+        submenu(&opcao);
+        switch(opcao) {
+            case 1:
+                system("clear||cls");
+                printf("\n=============================");
+                printf("\nTodas as matrículas cadastradas:");
+                for(i = 0; i < quantMatriculas; i++) {
+                    imprimirMatricula(matriculas, i);
+                }
+                break;
+            case 2:
+                printf("\nInforme o cpf do aluno:");
+                scanf("%s", cpf);
+                printf("\nInforme o código do curso:");
+                scanf("%s", codigo);
+                posicao = verificarCodigoeCPFMatricula(matriculas, codigo, cpf, quantMatriculas);
+                printf("%d", posicao);
+                /*if(posicao < 0) {
+
+                }*/
+                break;
+            case 3:
+                system("clear||cls");
+
+                printf("\nIncluindo matrícula no sistema...");
+                printf("\n");
+                printf("\nInforme o cpf do aluno:");
+                scanf("%s", cpf);
+                printf("\nInforme o código do curso:");
+                scanf("%s", codigo);
+
+                if(verificarCPF(alunos, cpf, quantAlunos) >= 0 && verificarCodigo(cursos, codigo, quantCursos) >= 0) {
+                    posicao = verificarCodigoeCPFMatricula(matriculas, codigo, cpf, quantMatriculas);
+                    if(posicao < 0) {
+                        strcpy(matriculas[quantMatriculas].codigoCurso, codigo);
+                        strcpy(matriculas[quantMatriculas].cpfAluno, cpf);
+                        free(cpf);
+                        free(codigo);
+
+                        resultado = incluirMatricula(matriculas, &quantMatriculas);
+                        if(resultado == 1) {
+                            printf("\n=============================");
+                            printf("\nMatrícula cadastrada com sucesso!");
+                            printf("\n=============================");
+                            printf("\n");
+                        }
+                        else {
+                            MensagemErroCadastro();
+                        }
+                    }
+                    else {
+                        printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                        printf("\nA matrícula inserida já existe no sistema.");
+                        printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                        printf("\n");
+                    }
+                }
+
+                break;
+            case 4:
+                printf("Alterar ou excluir do sistema");
+                break;
+            default:
+                ImprimirMensagemDeErro();
+        }
+    }
+    else {
+        MensagemErroAloca();
+    }
+}
+
+void Relatorios() {
+    int opcao;
+    printf("\n=============================");
+    printf("Submenu de Relatórios");
+    submenuRelatorios(&opcao);
+}
+
 void mainMenu() {
     int opcao, opcaoSubmenu, opcaoAlterarExcluir, opcaoSubmenuAlterar;
     int quantAlunos = 0, quantCursos = 0, quantMatriculas, resultado, posicao, i;
     int limiteAlunos = 100, limiteCursos = 50, limiteMatriculas = 200;
     char *cpf, *codigo;
-
-    struct aluno *alunos; 
+ 
+    struct aluno *alunos;
     struct curso *cursos;
     struct matricula *matriculas;
 
-    alunos = (struct aluno*) malloc (limiteAlunos * sizeof(struct aluno));
     cursos = (struct curso*) malloc (limiteCursos * sizeof(struct curso));
-
     matriculas = (struct matricula*) malloc (limiteMatriculas * sizeof(struct matricula));
+    alunos = leituraAlunos(limiteAlunos, &quantAlunos);
+
     cpf = (char *) malloc(sizeof (char) * 16); 
     codigo = (char *) malloc(sizeof(char) * 12);
 
@@ -381,248 +650,21 @@ void mainMenu() {
         scanf("%d", &opcao);
 
         if(opcao == 1) {
-            if(alunos != NULL && cpf != NULL) {
-                if(quantAlunos == 0) {
-                    leituraAlunos(alunos, limiteAlunos, &quantAlunos);
-                }
-                printf("\n=============================");
-                printf("\nSubmenu de Alunos");
-                submenu(&opcaoSubmenu);
-                switch (opcaoSubmenu) {
-                    case 1:
-                        system("clear||cls");
-                        printf("\n=============================");
-                        printf("\nTodos os alunos cadastrados"); 
-                        for(i = 0; i < quantAlunos; i++) {
-                            imprimirAluno(alunos, i);
-                        }
-                        break;
-                    case 2:
-                        printf("\nInforme o cpf do aluno:");
-                        scanf("%s", cpf);
-                        posicao = verificarCPF(alunos, cpf, quantAlunos);
-                        if(posicao < 0) {
-                            printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                            printf("\nCPF não encontrado no sistema.");
-                            printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                        }
-                        else {
-                            imprimirAluno(alunos, posicao);
-                        }
-                        break;
-                    case 3:
-                        system("clear||cls");
-
-                        printf("\nIncluindo aluno no sistema...");
-                        printf("\n");
-                        printf("\nInforme o CPF do aluno: ");
-
-                        getchar();
-                        fgets(cpf, 15, stdin);
-                        cpf[strcspn(cpf, "\n")] = '\0';
-                        if(verificarCPF(alunos, cpf, quantAlunos) >= 0) {
-                            printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                            printf("\nO CPF inserido já existe no sistema.");
-                            printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                            printf("\n");
-                        }
-                        else {
-                            strcpy(alunos[quantAlunos].cpf, cpf);
-                            free(cpf); //liberar o locald a memória
-                            resultado = incluirAluno(alunos, &quantAlunos);
-                            if(resultado == 1) { //feedback
-                                system("clear||cls");
-
-                                inserirEmArqAlunos(alunos, quantAlunos);
-
-                                printf("\n=============================");
-                                printf("\nAluno adicionado ao sistema com sucesso!");
-                                printf("\n=============================");
-                                printf("\n");
-                            }
-                            else {
-                                MensagemErroCadastro();
-                            }
-                        }
-                        break;
-                    case 4:
-                        printf("\nInforme o cpf do aluno:");
-                        scanf("%s", cpf);
-                        submenuAlterarExcluir(&opcaoAlterarExcluir);
-                        posicao = verificarCPF(alunos, cpf, quantAlunos);
-                        if(opcaoAlterarExcluir == 1) {
-                            submenuAlterar(&opcaoSubmenuAlterar);
-                        }
-                        else if(opcaoAlterarExcluir == 2) {
-                            printf("\n=============================");
-                            printf("\nAluno removido do sistema com sucesso!");
-                            printf("\n=============================");
-                            printf("\n");
-                        }
-                        else {
-                            printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                            printf("\nA opção inserida não é válida, tente novamente.");
-                            printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                        }
-                        break;
-                    default:
-                        ImprimirMensagemDeErro();
-                        break;
-                }
+            if(cpf != NULL) {
+                submenuAlunos(alunos, cpf, &quantAlunos);
             }
             else {
                 MensagemErroAloca();
             }
         }
         else if(opcao == 2) {
-            if(cursos != NULL) {
-                printf("\n=============================");
-                printf("\nSubmenu de Cursos:");
-                submenu(&opcaoSubmenu);
-                switch (opcaoSubmenu) {
-                    case 1:
-                        printf("\n=============================");
-                        printf("\nDados de todos os cursos");
-                        printf("\n");
-                        break;
-                    case 2:
-                        printf("\nVoce selecionou 2");
-                        break;
-                    case 3:
-                        printf("\nInsira o código do curso a ser inserido no sistema: ");
-                        if(codigo != NULL) {
-                            scanf("%s", codigo);   
-                            
-                            if(verificarCodigo(cursos, codigo, quantCursos) >= 0) {
-                                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                                printf("\nO código inserido já existe no sistema.");
-                                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                                printf("\n");
-                            }
-                            else {
-                                strcpy(cursos[quantCursos].codigo, codigo);
-
-                                if(incluirCurso(cursos, &quantCursos) == 1) { //confirma se o processo de incluir foi terminado
-                                    system("clear||cls");
-
-                                    inserirEmArqCursos(cursos, quantCursos);
-
-                                    printf("\n=============================");
-                                    printf("\nCurso cadastrado com sucesso!");
-                                    printf("\n=============================");
-                                    printf("\n");
-                                }
-
-                                else {
-                                    MensagemErroCadastro();
-                                }
-                            }
-                        }
-                        else {
-                            printf("\nInforme o código do curso:");
-                            scanf("%s", &codigo);
-                            submenuAlterarExcluir(&opcaoAlterarExcluir);
-                            if(opcaoAlterarExcluir == 1) {
-                                submenuAlterar(&opcaoSubmenuAlterar);
-                            }
-                            else if(opcaoAlterarExcluir == 2) {
-                                printf("\n=============================");
-                                printf("\nCurso removido do sistema com sucesso!");
-                                printf("\n=============================");
-                                printf("\n");
-                            }
-                            else {
-                                printf("\nA opção inserida é inválida.");
-                            }
-                        }
-                        break;
-                    case 4:
-                        printf("\nVoce selecionou 4");
-                        break;
-                    default:
-                        ImprimirMensagemDeErro();
-                        break;
-                }
-            }
-            else {
-                MensagemErroAloca();
-            }
+            submenuCursos(cursos);
         }
         else if(opcao == 3) {
-            if(matriculas != NULL && cpf != NULL && codigo != NULL) {
-                printf("\n=============================");
-                printf("\nSubmenu de Matrícula");
-                submenu(&opcaoSubmenu);
-                switch(opcaoSubmenu) {
-                    case 1:
-                        system("clear||cls");
-                        printf("\n=============================");
-                        printf("\nTodas as matrículas cadastradas:");
-                        for(i = 0; i < quantMatriculas; i++) {
-                            imprimirMatricula(matriculas, i);
-                        }
-                        break;
-                    case 2:
-                        printf("\nInforme o cpf do aluno:");
-                        scanf("%s", cpf);
-                        printf("\nInforme o código do curso:");
-                        scanf("%s", codigo);
-                        posicao = verificarCodigoeCPFMatricula(matriculas, codigo, cpf, quantMatriculas);
-                        printf("%d", posicao);
-                        /*if(posicao < 0) {
-
-                        }*/
-                       break;
-                    case 3:
-                        system("clear||cls");
-
-                        printf("\nIncluindo matrícula no sistema...");
-                        printf("\nInforme o cpf do aluno:");
-                        scanf("%s", cpf);
-                        printf("\nInforme o código do curso:");
-                        scanf("%s", codigo);
-                        
-                        posicao = verificarCodigoeCPFMatricula(matriculas, codigo, cpf, quantMatriculas);
-                        if(posicao < 0) {
-                            strcpy(matriculas[quantMatriculas].codigoCurso, codigo);
-                            strcpy(matriculas[quantMatriculas].cpfAluno, cpf);
-                            free(cpf);
-                            free(codigo);
-
-                            resultado = incluirMatricula(matriculas, &quantMatriculas);
-                            if(resultado == 1) {
-                                printf("\n=============================");
-                                printf("\nMatrícula cadastrada com sucesso!");
-                                printf("\n=============================");
-                                printf("\n");
-                            }
-                            else {
-                                MensagemErroCadastro();
-                            }
-                        }
-                        else {
-                            printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                            printf("\nA matrícula inserida já existe no sistema.");
-                            printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                            printf("\n");
-                        }
-
-                        break;
-                    case 4:
-                        printf("Alterar ou excluir do sistema");
-                        break;
-                    default:
-                        ImprimirMensagemDeErro();
-                }
-            }
-            else {
-                MensagemErroAloca();
-            }
+            submenuMatricula(matriculas, alunos, cursos);
         }
         else if(opcao == 4) {
-            printf("\n=============================");
-            printf("Submenu de Relatórios");
-            submenuRelatorios(&opcao);
+            Relatorios();
         }
         else {
             ImprimirMensagemDeErro();
@@ -631,6 +673,7 @@ void mainMenu() {
     while(opcao != 5);
     if(opcao == 5) { 
         system("clear||cls");
+        inserirEmArqAlunos(alunos, quantAlunos);
         free(alunos);
         free(cursos);
 
