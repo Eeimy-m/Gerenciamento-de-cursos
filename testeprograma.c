@@ -110,14 +110,18 @@ void inserirEmArqCursos(struct curso cursos[], int quant) {
     fclose(arq);
 }
 
-void inserirEmArqAlunos(struct aluno alunos[], int quant) { //quant está indicando a posição do elemento que vai ser gravado no arquivo
+void inserirEmArqAlunos(struct aluno alunos[], int quantAdicionados, int quantJaNoArquivo) { //quant está indicando a posição do elemento que vai ser gravado no arquivo
     FILE *arq;
+    size_t tamanhoArquivo;
     arq = fopen("alunos.dat", "ab"); //arq binário 
+    //A partir de que elemento do vetor é necessário gravar no arquivo
+    //quantJaNoArquivo = índice de onde começar a pegar pra gravar
+
     if(arq == NULL) {
         printf("Não foi possível abrir o arquivo.");
         exit(0);
     }
-    if((fwrite(alunos, sizeof(struct aluno), quant, arq)) != quant) {
+    if((fwrite(alunos + quantJaNoArquivo, sizeof(struct aluno), quantAdicionados, arq)) != quantAdicionados) { 
         printf("\nErro na escrita");
         exit(0);
     } 
@@ -135,6 +139,7 @@ struct aluno *leituraAlunos(int limiteAlunos, int *quantAlunos) {
 
     arq = fopen("alunos.dat", "ab+");
     if(arq == NULL) {
+        *quantAlunos = 0;
         printf("\nNão foi possível abrir o arquivo.");
         fclose(arq);
         exit(0);
@@ -149,7 +154,7 @@ struct aluno *leituraAlunos(int limiteAlunos, int *quantAlunos) {
     if(alunos == NULL) {
         MensagemErroAloca();
     }
-    printf("%zu", lidos);
+    printf("%zu", lidos); //teste
 
     if(lidos != tamanhoArquivo) {
         printf("\nErro na leitura do arquivo.");
@@ -158,6 +163,7 @@ struct aluno *leituraAlunos(int limiteAlunos, int *quantAlunos) {
         exit(0);
     }
 
+    fclose(arq);
     *quantAlunos = (int) lidos;
     return alunos;
 }
@@ -203,10 +209,6 @@ int incluirAluno(struct aluno *listaAlunos, int *quant) {
 
     printf("Telefone(s) inserido(s) com sucesso.");
     printf("\n");
-    
-    printf("\n%s", listaAlunos[*quant].cpf);
-    printf("\n%s", listaAlunos[*quant].nome);
-    printf("\n%s", listaAlunos[*quant].dataNascimento);
 
     (*quant)++;
     return 1;
@@ -236,13 +238,14 @@ int incluirMatricula(struct matricula matriculas[], int *quant) {
     return 1;
 }
 
-int verificarCPF(struct aluno listaAlunos[], char *cpf, int quantAlunos) { 
+int verificarCPF(struct aluno listaAlunos[], char *cpf, int *quantAlunos) { 
     int i, resultado; 
-    if(quantAlunos == 0) {
+    if(*quantAlunos == 0) {
+        printf("Não tem nenhum cadastro");
         return -1;
     }
     else {
-        for(i = 0; i < quantAlunos; i++) {
+        for(i = 0; i < *quantAlunos; i++) {
             if(strcmp(cpf, listaAlunos[i].cpf) == 0) {
                 return i;
             }
@@ -363,9 +366,13 @@ void MensagemErroCadastro() {
     printf("\n");
 }
 
-void submenuAlunos(struct aluno alunos[], char *cpf, int *quantAlunos) {
+void submenuAlunos(struct aluno alunos[], char *cpf, int *quantTotal) {
     int opcao, posicao, resultado, i;
-    int quant = *quantAlunos;
+    int quant = *quantTotal;
+
+    printf("\n%s", alunos[0].cpf);
+    printf("\n%s", alunos[0].nome);
+    printf("\nQuantAlunos = %d", *quantTotal);
 
     printf("\n=============================");
     printf("\nSubmenu de Alunos");
@@ -375,8 +382,11 @@ void submenuAlunos(struct aluno alunos[], char *cpf, int *quantAlunos) {
             system("clear||cls");
             printf("\n=============================");
             printf("\nTodos os alunos cadastrados"); 
-            for(i = 0; i < *quantAlunos; i++) {
+            for(i = 0; i <= quant; i++) {
                 imprimirAluno(alunos, i);
+            }
+            if(*quantTotal == 0) {
+                printf("\nNão há nenhum cadastro no sistema.");
             }
             break;
         case 2:
@@ -385,7 +395,7 @@ void submenuAlunos(struct aluno alunos[], char *cpf, int *quantAlunos) {
             fgets(cpf, 15, stdin);
             cpf[strcspn(cpf, "\n")] = '\0';
 
-            posicao = verificarCPF(alunos, cpf, quant);
+            posicao = verificarCPF(alunos, cpf, quantTotal);
             if(posicao < 0) {
                 printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                 printf("\nCPF não encontrado no sistema.");
@@ -406,16 +416,16 @@ void submenuAlunos(struct aluno alunos[], char *cpf, int *quantAlunos) {
             fgets(cpf, 15, stdin);
             cpf[strcspn(cpf, "\n")] = '\0';
 
-            if(verificarCPF(alunos, cpf, quant) >= 0) {
+            if(verificarCPF(alunos, cpf, quantTotal) >= 0) {
                 printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                 printf("\nO CPF inserido já existe no sistema.");
                 printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                 printf("\n");
             }
             else {
-                strcpy(alunos[*quantAlunos].cpf, cpf);
+                strcpy(alunos[*quantTotal].cpf, cpf);
                 free(cpf); //liberar o locald a memória
-                resultado = incluirAluno(alunos, quantAlunos); //quantAlunos contém o endereço de memória pro local onde aponta
+                resultado = incluirAluno(alunos, quantTotal); //quantAlunos contém o endereço de memória pro local onde aponta
 
                 if(resultado == 1) { //feedback
                     system("clear||cls");
@@ -434,7 +444,7 @@ void submenuAlunos(struct aluno alunos[], char *cpf, int *quantAlunos) {
             printf("\nInforme o cpf do aluno:");
             scanf("%s", cpf);
             submenuAlterarExcluir(&opcao);
-            posicao = verificarCPF(alunos, cpf, quant);
+            posicao = verificarCPF(alunos, cpf, quantTotal);
             if(opcao == 1) {
                 submenuAlterar(&opcao);
             }
@@ -445,9 +455,7 @@ void submenuAlunos(struct aluno alunos[], char *cpf, int *quantAlunos) {
                 printf("\n");
             }
             else {
-                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                printf("\nA opção inserida não é válida, tente novamente.");
-                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                ImprimirMensagemDeErro();
             }
             break;
         default:
@@ -572,7 +580,7 @@ void submenuMatricula(struct matricula matriculas[], struct aluno alunos[], stru
                 printf("\nInforme o código do curso:");
                 scanf("%s", codigo);
 
-                if(verificarCPF(alunos, cpf, quantAlunos) >= 0 && verificarCodigo(cursos, codigo, quantCursos) >= 0) {
+                if(verificarCPF(alunos, cpf, &quantAlunos) >= 0 && verificarCodigo(cursos, codigo, quantCursos) >= 0) {
                     posicao = verificarCodigoeCPFMatricula(matriculas, codigo, cpf, quantMatriculas);
                     if(posicao < 0) {
                         strcpy(matriculas[quantMatriculas].codigoCurso, codigo);
@@ -621,7 +629,8 @@ void Relatorios() {
 
 void mainMenu() {
     int opcao, opcaoSubmenu, opcaoAlterarExcluir, opcaoSubmenuAlterar;
-    int quantAlunos = 0, quantCursos = 0, quantMatriculas, resultado, posicao, i;
+    int quantAlunosAdicionados = 0, quantAlunosArquivo = 0, quantCursos = 0, quantMatriculas = 0, resultado, posicao, i;
+    int quantTotal;
     int limiteAlunos = 100, limiteCursos = 50, limiteMatriculas = 200;
     char *cpf, *codigo;
  
@@ -631,7 +640,10 @@ void mainMenu() {
 
     cursos = (struct curso*) malloc (limiteCursos * sizeof(struct curso));
     matriculas = (struct matricula*) malloc (limiteMatriculas * sizeof(struct matricula));
-    alunos = leituraAlunos(limiteAlunos, &quantAlunos);
+    alunos = leituraAlunos(limiteAlunos, &quantAlunosArquivo); //quantAlunos = quant de coisas no arquivo 
+    quantTotal = quantAlunosAdicionados + quantAlunosArquivo;
+    
+    printf("%d", quantAlunosArquivo);
 
     cpf = (char *) malloc(sizeof (char) * 16); 
     codigo = (char *) malloc(sizeof(char) * 12);
@@ -651,7 +663,7 @@ void mainMenu() {
 
         if(opcao == 1) {
             if(cpf != NULL) {
-                submenuAlunos(alunos, cpf, &quantAlunos);
+                submenuAlunos(alunos, cpf, &quantTotal);
             }
             else {
                 MensagemErroAloca();
@@ -666,14 +678,18 @@ void mainMenu() {
         else if(opcao == 4) {
             Relatorios();
         }
-        else {
+        else if(opcao > 5 || opcao <= 0) {
             ImprimirMensagemDeErro();
         }
     }
     while(opcao != 5);
     if(opcao == 5) { 
-        system("clear||cls");
-        inserirEmArqAlunos(alunos, quantAlunos);
+        //system("clear||cls");
+        quantAlunosAdicionados = quantTotal - quantAlunosArquivo;
+        if(quantAlunosAdicionados > 0) {
+            inserirEmArqAlunos(alunos, quantAlunosAdicionados, quantAlunosArquivo);
+        } 
+        //Se já existiam x dados no arquivo, eu preciso colocar no arquivo o que vem a partir de x+1 
         free(alunos);
         free(cursos);
 
