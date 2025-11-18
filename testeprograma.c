@@ -24,6 +24,13 @@ void MensagemErroAloca() {
     printf("\n");
 }
 
+void ErroNaExclusao() {
+    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    printf("\nErro na exclusão.");
+    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    printf("\n");
+}
+
 void ImprimirMensagemDeErro() {
     system("clear||cls");
     printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
@@ -155,7 +162,7 @@ void inserirEmArqAlunos(struct aluno alunos[], int *quantAdicionados, int quantJ
     fclose(arq);
 }
 
-int sobrescreverArq(char nomeArquivo[], struct aluno *alunos, int totalAlunos) {
+int sobrescreverArqAlunos(char nomeArquivo[], struct aluno *alunos, int totalAlunos) {
     FILE *arq;
     arq = fopen(nomeArquivo, "wb");
     if(arq == NULL) {
@@ -171,6 +178,25 @@ int sobrescreverArq(char nomeArquivo[], struct aluno *alunos, int totalAlunos) {
        }
        fclose(arq);
        return 1; //caso dê certo, retorna 1
+    }
+}
+
+int sobrescreverArqCursos(char nomeArquivo[], struct curso *cursos, int total) {
+    FILE *arq;
+    arq = fopen(nomeArquivo, "wb");
+    if(arq == NULL) {
+        printf("\nNão foi possível abrir o arquivo.");
+        fclose(arq);
+        exit(0);
+    }
+    else {
+       if(fwrite(cursos, sizeof(struct curso), total, arq) != total) {
+            printf("\nErro na escrita");
+            fclose(arq);
+            exit(0);
+       }
+       fclose(arq);
+       return 1; 
     }
 }
 
@@ -668,7 +694,7 @@ void submenuAlunos(struct aluno alunos[], char *cpf, int *quantTotal, int quantA
                     if(opcao == 1) {
                         resultado = submenuAlterarAluno(alunos, posicao, quantTotal);
                         if(resultado == 1) {
-                            resultSobrescrever = sobrescreverArq("alunos.dat", alunos, *quantTotal);
+                            resultSobrescrever = sobrescreverArqAlunos("alunos.dat", alunos, *quantTotal);
                             if(resultSobrescrever == 1) {
                                 mensagemAlterarSucesso();
                             }
@@ -677,7 +703,7 @@ void submenuAlunos(struct aluno alunos[], char *cpf, int *quantTotal, int quantA
                     else if(opcao == 2) {
                         if(*quantTotal > 1) {
                             resultado = excluirAluno(alunos, posicao, quantTotal); //altera o vetor
-                            resultSobrescrever = sobrescreverArq("alunos.dat", alunos, *quantTotal); //altera o arquivo 
+                            resultSobrescrever = sobrescreverArqAlunos("alunos.dat", alunos, *quantTotal); //altera o arquivo 
 
                             if(resultado == 1 && resultSobrescrever == 1) {
                                 printf("\n=============================");
@@ -686,7 +712,7 @@ void submenuAlunos(struct aluno alunos[], char *cpf, int *quantTotal, int quantA
                                 printf("\n");   
                             }
                             else {
-                                printf("\nErro na exclusão.");
+                                ErroNaExclusao();
                             }
                         }
                         else if(*quantTotal == 1) {
@@ -729,7 +755,7 @@ void submenuAlunos(struct aluno alunos[], char *cpf, int *quantTotal, int quantA
 }
 
 void submenuCursos(struct curso cursos[], char *codigo, int *quantTotal, int quantArquivo) {
-    int opcao, i, posicao;
+    int opcao, i, posicao, resultado, resultSobrescrever;
     int quantAdicionados = 0;
 
     do{
@@ -737,12 +763,20 @@ void submenuCursos(struct curso cursos[], char *codigo, int *quantTotal, int qua
         printf("\nSubmenu de Cursos:");
         submenu(&opcao);
         if(opcao == 1) {
-            printf("\n=============================");
-            printf("\nTodos os cursos cadastrados");
-            printf("\n");
+            if(*quantTotal > 0) {
+                printf("\n=============================");
+                printf("\nTodos os cursos cadastrados");
+                printf("\n");
 
-            for(i = 0; i < *quantTotal; i++) {
-                imprimirCurso(cursos, i);
+                for(i = 0; i < *quantTotal; i++) {
+                    imprimirCurso(cursos, i);
+                }
+            }
+            else {
+                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                printf("\nNão há nenhum cadastro no sistema.");
+                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                printf("\n");
             }
         } 
         else if(opcao == 2) {
@@ -770,6 +804,7 @@ void submenuCursos(struct curso cursos[], char *codigo, int *quantTotal, int qua
             codigo[strcspn(codigo, "\n")] = '\0';  
             
             if(verificarCodigo(cursos, codigo, quantTotal) >= 0) {
+                system("clear||cls");
                 printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                 printf("\nO código inserido já existe no sistema.");
                 printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
@@ -794,8 +829,7 @@ void submenuCursos(struct curso cursos[], char *codigo, int *quantTotal, int qua
         }
         else if(opcao == 4) {
             printf("\nInforme o código do curso:");
-            fgets(codigo, 11, stdin);
-            codigo[strcspn(codigo, "\n")] = '\0';
+            scanf("%s", codigo);
             posicao = verificarCodigo(cursos, codigo, quantTotal);
 
             if(posicao >= 0) {
@@ -804,11 +838,28 @@ void submenuCursos(struct curso cursos[], char *codigo, int *quantTotal, int qua
                     submenuAlterarCurso(cursos, posicao, quantTotal);
                 }
                 else if(opcao == 2) {
-                    excluirCurso(cursos, posicao, quantTotal);
-                    printf("\n=============================");
-                    printf("\nCurso removido do sistema com sucesso!");
-                    printf("\n=============================");
-                    printf("\n");
+                    if(*quantTotal > 1) {
+                        resultado = excluirCurso(cursos, posicao, quantTotal); //altera o vetor
+                        resultSobrescrever = sobrescreverArqCursos("cursos.dat", cursos, *quantTotal); //altera o arquivo 
+
+                        if(resultado == 1 && resultSobrescrever == 1) {
+                            printf("\n=============================");
+                            printf("\nCurso removido do sistema com sucesso!");
+                            printf("\n=============================");
+                            printf("\n");   
+                        }
+                        else {
+                            ErroNaExclusao();
+                        }
+                    }
+                    else if(*quantTotal == 1) {
+                        if(remove("cursos.dat") == 0 && excluirCurso(cursos, 0, quantTotal) == 1) {
+                            
+                        }
+                        else {
+                            printf("\nNão foi possível excluir o arquivo");
+                        }
+                    }
                 }
                 else {
                     ImprimirMensagemDeErro();
@@ -823,6 +874,7 @@ void submenuCursos(struct curso cursos[], char *codigo, int *quantTotal, int qua
     if(opcao == 5) {
         inserirEmArqCursos(cursos, &quantAdicionados, quantArquivo); //Quando o submenu for fechado, os dados do vetor vão pro arquivo
         free(cursos); //sendo quantAdicionados > 0 ou não, o vetor deve ser liberado
+        free(codigo);
 
         system("clear||cls");
 
