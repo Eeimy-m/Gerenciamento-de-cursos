@@ -24,6 +24,28 @@ void MensagemErroAloca() {
     printf("\n");
 }
 
+void ImprimirMensagemDeErro() {
+    system("clear||cls");
+    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    printf("\nA opção inserida não é válida, tente novamente.");
+    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    printf("\n");
+}
+
+void mensagemAlterarSucesso() {
+    printf("\n=============================");
+    printf("\nDados alterados com sucesso!");
+    printf("\n=============================");
+    printf("\n");   
+}
+
+void mensagemErroAlterar() {
+    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    printf("\nErro na alteração de dados");
+    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    printf("\n");
+}
+
 int TamanhoArqu(FILE *arq, int limite, int sizeStruct) {
     int quant, tamTotal;
     long tamanho;
@@ -119,7 +141,7 @@ void inserirEmArqAlunos(struct aluno alunos[], int *quantAdicionados, int quantJ
     //quantJaNoArquivo = índice de onde começar a pegar pra gravar
 
     if(arq == NULL) {
-        printf("Não foi possível abrir o arquivo.");
+        printf("\nNão foi possível abrir o arquivo.");
         fclose(arq);
         exit(0);
     }
@@ -402,37 +424,83 @@ void submenu(int *opcao) {
     scanf("%d", opcao);
 }
 
-void submenuAlterar(int *opcao) {
+void submenuAlterarGeral(int *opcao) {
     printf("\n=============================");
     printf("\n1- Nome");
     printf("\n2- data de nascimento");
     printf("\n3- Sexo");
-    printf("\n1- E-mail");
-    printf("\n1- Telefone");
+    printf("\n4- E-mail");
+    printf("\n5- Telefone");
+    printf("\n6- Sair");
     printf("\n=============================");
     printf("\n");
     printf("\nSelecione uma das opções:");
     scanf("%d", opcao);
 }
 
-void submenuAlterarAluno(struct aluno alunos[], int posicaoAlterar, int *quantTotal, int opcao) {
+int submenuAlterarAluno(struct aluno alunos[], int posicaoAlterar, int *quantTotal, int opcao) {
     int i, quantEmailsAlterar;
     switch(opcao) {
         case 1:
             printf("\nInsira o nome do aluno:");
+            getchar();
+            fgets(alunos[posicaoAlterar].nome, sizeof(alunos[posicaoAlterar].nome), stdin);
+            alunos[posicaoAlterar].nome[strcspn(alunos[posicaoAlterar].nome, "\n")] = '\0';
+            return 1;
         case 2:
             printf("\nInsira a data de nasicmento:");
+            printf("\nData de nascimento (dd/mm/aaaa): ");
+            scanf("%10s", alunos[posicaoAlterar].dataNascimento);
+            return 1;
         case 3:
+            getchar();
             printf("\nInsira o gênero do aluno:");
+            scanf("%c", &alunos[posicaoAlterar].sexo);
+            return 1;
         case 4:
             //procurar e mostrar os emails disponíveis
-            printf("\nInforme a quantidade de e-mails a serem alterados:");
-            scanf("%d", &quantEmailsAlterar);
+            printf("\n=============================");
             printf("\nEmails disponíveis:");
-            for(i = 0; i < alunos[posicaoAlterar].quantEmails; i++) {
+            for(i = 0; i < alunos[posicaoAlterar].quantEmails; i++) { //printa as opções de e-mails p/ alterar
                 printf("\n%d- %s", i+1, alunos[posicaoAlterar].emails[i]);
             }
-            
+            printf("\n=============================");
+            printf("\n");
+            printf("\nSelecione uma das opções:");
+            scanf("%d", &opcao);
+            printf("\n");
+            printf("\nInforme o novo e-mail:");
+            scanf("%s", alunos[posicaoAlterar].emails[opcao-1]);
+            return 1;
+        case 5:
+            printf("\n=============================");
+            printf("\nTelefones disponíveis: ");
+            for(i = 0; i < alunos[posicaoAlterar].quantTelefones; i++) {
+                printf("\n%d- %s", i+1, alunos[posicaoAlterar].telefones[i]);
+            }
+            printf("\n=============================");
+            printf("\n");
+            printf("\nSelecione uma das opções:");
+            scanf("%d", &opcao);
+            printf("\n");
+            printf("\nInforme o novo telefone:");
+            scanf("%s", alunos[posicaoAlterar].telefones[opcao-1]);
+            return 1;
+        default:
+            ImprimirMensagemDeErro();
+    }
+}
+
+int submenuAlterarCurso(struct curso cursos[], int posicaoAlterar, int *quantTotal, int opcao) {
+    int i;
+    switch(opcao) {
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+        default:
+            ImprimirMensagemDeErro();
     }
 }
 
@@ -459,14 +527,6 @@ void submenuAlterarExcluir(int *opcao) {
     scanf("%d", opcao);
 }
 
-void ImprimirMensagemDeErro() {
-    system("clear||cls");
-    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-    printf("\nA opção inserida não é válida, tente novamente.");
-    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-    printf("\n");
-}
-
 void MensagemErroCadastro() {
     printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     printf("\nNão foi possível concluir o cadastro.");
@@ -477,8 +537,6 @@ void MensagemErroCadastro() {
 void submenuAlunos(struct aluno alunos[], char *cpf, int *quantTotal, int quantArquivo) {
     int opcao, posicao, resultado, resultSobrescrever, i;
     int quantAdicionados = 0;
-
-    printf("%s", alunos[0].telefones[0]);
 
     do{
         printf("\n=============================");
@@ -565,9 +623,18 @@ void submenuAlunos(struct aluno alunos[], char *cpf, int *quantTotal, int quantA
                 printf("\nInforme o cpf do aluno:");
                 scanf("%s", cpf);
                 posicao = verificarCPF(alunos, cpf, quantTotal);
+
                 if(posicao >= 0) {
                     if(opcao == 1) {
-                        submenuAlterar(&opcao);
+                        submenuAlterarGeral(&opcao);
+                        resultado = submenuAlterarAluno(alunos, posicao, quantTotal, opcao);
+
+                        if(resultado == 1) {
+                            mensagemAlterarSucesso();
+                        }
+                        else {
+                            mensagemErroAlterar();
+                        }
                     }
                     else if(opcao == 2) {
                         if(*quantTotal > 1) {
@@ -693,7 +760,7 @@ void submenuCursos(struct curso cursos[], char *codigo, int *quantTotal, int qua
             codigo[strcspn(codigo, "\n")] = '\0';
             submenuAlterarExcluir(&opcao);
             if(opcao == 1) {
-                submenuAlterar(&opcao);
+                submenuAlterarGeral(&opcao);
             }
             else if(opcao == 2) {
                 printf("\n=============================");
