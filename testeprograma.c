@@ -208,8 +208,23 @@ struct curso *leituraCursos(int limiteCursos, int *quantCursos) { //Lê os dados
     return cursos;
 }
 
-void excluir() {
-
+int excluirAluno(struct aluno alunos[], int totalAlunos, int posicaoExcluir) {
+    int i, j;
+    for(i = posicaoExcluir; i < totalAlunos; i++) {
+        strcpy(alunos[i].cpf, alunos[i+1].cpf);
+        strcpy(alunos[i].dataNascimento, alunos[i+1].dataNascimento);
+        strcpy(alunos[i].nome, alunos[i+1].nome);
+        alunos[i].sexo = alunos[i+1].sexo;
+        alunos[i].quantEmails = alunos[i+1].quantEmails;
+        alunos[i].quantTelefones = alunos[i+1].quantTelefones;
+        for(j = 0; j < alunos[i+1].quantEmails; j++) {
+            strcpy(alunos[i].emails[j], alunos[i+1].emails[j]);
+        }
+        for(j = 0; j < alunos[i].quantTelefones; j++) {
+            strcpy(alunos[i].telefones[j], alunos[i+1].telefones[j]);
+        }
+    }
+    return 1;
 }
 
 int incluirAluno(struct aluno *listaAlunos, int *posicao, int *quantAdicionados) {
@@ -483,21 +498,35 @@ void submenuAlunos(struct aluno alunos[], char *cpf, int *quantTotal, int quantA
             }  
                
             else if(opcao == 4) {
+                submenuAlterarExcluir(&opcao);
                 printf("\nInforme o cpf do aluno:");
                 scanf("%s", cpf);
-                submenuAlterarExcluir(&opcao);
                 posicao = verificarCPF(alunos, cpf, quantTotal);
-                if(opcao == 1) {
-                    submenuAlterar(&opcao);
-                }
-                else if(opcao == 2) {
-                    printf("\n=============================");
-                    printf("\nAluno removido do sistema com sucesso!");
-                    printf("\n=============================");
-                    printf("\n");
+                if(posicao >= 0) {
+                    if(opcao == 1) {
+                        submenuAlterar(&opcao);
+                    }
+                    else if(opcao == 2) {
+                        resultado = excluirAluno(alunos, *quantTotal, posicao);
+                        if(resultado == 1) {
+                            printf("\n=============================");
+                            printf("\nAluno removido do sistema com sucesso!");
+                            printf("\n=============================");
+                            printf("\n");   
+                        }
+                        else {
+                            printf("\nErro na exclusão.");
+                        }
+                    }
+                    else {
+                        ImprimirMensagemDeErro();
+                    }
                 }
                 else {
-                    ImprimirMensagemDeErro();
+                    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    printf("\nCPF não encontrado no sistema.");
+                    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    printf("\n");
                 }
             }
                
