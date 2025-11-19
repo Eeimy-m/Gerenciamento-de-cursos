@@ -17,6 +17,27 @@ struct matricula {//Não pode existir mais de um mesmo cpf com um mesmo código 
     char codigoCurso[10], dataInicio, dataFim, cpfAluno[14];
 };
 
+void naoHaCadastro() {
+    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    printf("\nNão há nenhum cadastro no sistema.");
+    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    printf("\n");
+}
+
+void cpfNaoEncontrado() {
+    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    printf("\nCPF não encontrado no sistema.");
+    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    printf("\n");
+}
+
+void MensagemErroCadastro() {
+    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    printf("\nNão foi possível concluir o cadastro.");
+    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    printf("\n");
+}
+
 void MensagemErroAloca() {
     printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     printf("\nMemória insuficiente");
@@ -51,6 +72,12 @@ void mensagemErroAlterar() {
     printf("\nErro na alteração de dados");
     printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     printf("\n");
+}
+
+void NaoFoiPossivelAbrirOArq(FILE *arq) {
+    printf("Não foi possível abrir o arquivo.");
+    fclose(arq);
+    exit(0);
 }
 
 int TamanhoArqu(FILE *arq, int limite, int sizeStruct) {
@@ -124,7 +151,7 @@ void imprimirMatricula(struct matricula matriculas[], int n) {
 
 void inserirEmArqCursos(struct curso cursos[], int *quantAdicionados, int quantJaNoArquivo) {
     FILE *arq;
-    arq = fopen("cursos.dat", "ab"); //insere ao fim do arquivo
+    arq = fopen("cursos.dat", "ab");
     if(arq == NULL) {
         printf("Não foi possível abrir o arquivo.");
         fclose(arq);
@@ -133,9 +160,10 @@ void inserirEmArqCursos(struct curso cursos[], int *quantAdicionados, int quantJ
 
     if(*quantAdicionados > 0) {
         if((fwrite(cursos + quantJaNoArquivo, sizeof(struct curso), *quantAdicionados, arq)) != *quantAdicionados) {
-            printf("\nErro na escrita");
-            fclose(arq);
-            exit(0);
+            // printf("\nErro na escrita");
+            // fclose(arq);
+            // exit(0);
+            NaoFoiPossivelAbrirOArq(arq);
         } 
     }
     fclose(arq);
@@ -162,13 +190,28 @@ void inserirEmArqAlunos(struct aluno alunos[], int *quantAdicionados, int quantJ
     fclose(arq);
 }
 
-int sobrescreverArqAlunos(char nomeArquivo[], struct aluno *alunos, int totalAlunos) {
+void inserirEmArqMatricula(struct matricula matriculas[], int *quantAdicionados, int quantJaNoArquivo) {
     FILE *arq;
-    arq = fopen(nomeArquivo, "wb");
+    arq = fopen("matriculas.dat", "ab"); 
     if(arq == NULL) {
-        printf("\nNão foi possível abrir o arquivo.");
-        fclose(arq);
-        exit(0);
+        NaoFoiPossivelAbrirOArq(arq);
+    }
+
+    if(*quantAdicionados > 0) {
+        if((fwrite(matriculas + quantJaNoArquivo, sizeof(struct curso), *quantAdicionados, arq)) != *quantAdicionados) {
+            printf("\nErro na escrita");
+            fclose(arq);
+            exit(0);
+        } 
+    }
+    fclose(arq);
+}
+
+int sobrescreverArqAlunos(struct aluno *alunos, int totalAlunos) {
+    FILE *arq;
+    arq = fopen("alunos.dat", "wb");
+    if(arq == NULL) {
+        NaoFoiPossivelAbrirOArq(arq);
     }
     else {
        if(fwrite(alunos, sizeof(struct aluno), totalAlunos, arq) != totalAlunos) {
@@ -181,13 +224,11 @@ int sobrescreverArqAlunos(char nomeArquivo[], struct aluno *alunos, int totalAlu
     }
 }
 
-int sobrescreverArqCursos(char nomeArquivo[], struct curso *cursos, int total) {
+int sobrescreverArqCursos(struct curso *cursos, int total) {
     FILE *arq;
-    arq = fopen(nomeArquivo, "wb");
+    arq = fopen("cursos.dat", "wb");
     if(arq == NULL) {
-        printf("\nNão foi possível abrir o arquivo.");
-        fclose(arq);
-        exit(0);
+        NaoFoiPossivelAbrirOArq(arq);
     }
     else {
        if(fwrite(cursos, sizeof(struct curso), total, arq) != total) {
@@ -200,8 +241,21 @@ int sobrescreverArqCursos(char nomeArquivo[], struct curso *cursos, int total) {
     }
 }
 
-void inserirEmArqMatricula(struct matricula matriculas[], int quant) {
-
+int sobrescreverArqMatriculas(struct matricula *matriculas, int total) {
+    FILE *arq;
+    arq = fopen("matriculas.dat", "wb");
+    if(arq == NULL) {
+        NaoFoiPossivelAbrirOArq(arq);
+    }
+    else {
+       if(fwrite(matriculas, sizeof(struct matricula), total, arq) != total) {
+            printf("\nErro na escrita");
+            fclose(arq);
+            exit(0);
+       }
+       fclose(arq);
+       return 1; 
+    }
 }
 
 struct aluno *leituraAlunos(int limiteAlunos, int *quantAlunos) {
@@ -212,9 +266,7 @@ struct aluno *leituraAlunos(int limiteAlunos, int *quantAlunos) {
     arq = fopen("alunos.dat", "ab+");
     if(arq == NULL) {
         *quantAlunos = 0;
-        printf("\nNão foi possível abrir o arquivo.");
-        fclose(arq);
-        exit(0);
+        NaoFoiPossivelAbrirOArq(arq);
     }
 
     tamanhoArquivo = TamanhoArqu(arq, limiteAlunos, sizeof(struct aluno));
@@ -247,9 +299,7 @@ struct curso *leituraCursos(int limiteCursos, int *quantCursos) { //Lê os dados
     arq = fopen("cursos.dat", "ab+");
     if(arq == NULL) {
         *quantCursos = 0;
-        printf("\nNão foi possível abrir o arquivo.");
-        fclose(arq);
-        exit(0);
+        NaoFoiPossivelAbrirOArq(arq);
     }
 
     tamanhoArquivo = TamanhoArqu(arq, limiteCursos, sizeof(struct curso));
@@ -273,6 +323,40 @@ struct curso *leituraCursos(int limiteCursos, int *quantCursos) { //Lê os dados
     *quantCursos = (int) lidos;
     printf("\nTamanhoArquivo = %d", tamanhoArquivo);
     return cursos;
+}
+
+struct matricula *leituraMatriculas(int limiteMatriculas, int *quantMatriculas) {
+    FILE *arq;
+    int tamanhoArquivo, lidos;
+    struct matricula *matriculas;
+    
+    arq = fopen("matriculas.dat", "ab+");
+    if(arq == NULL) {
+        *quantMatriculas = 0;
+        NaoFoiPossivelAbrirOArq(arq);
+    }
+
+    tamanhoArquivo = TamanhoArqu(arq, limiteMatriculas, sizeof(struct matricula));
+    matriculas = (struct matricula*) malloc ((limiteMatriculas * sizeof(struct matricula)) + (int) tamanhoArquivo);
+
+    rewind(arq);
+    lidos = fread(matriculas, sizeof(struct matricula), tamanhoArquivo, arq);
+
+    if(matriculas == NULL) {
+        MensagemErroAloca();
+    }
+
+    if(lidos != tamanhoArquivo) {
+        printf("\nErro na leitura do arquivo.");
+        system("pause");
+        fclose(arq);
+        exit(0);
+    }
+
+    fclose(arq);
+    *quantMatriculas = (int) lidos;
+    printf("\nTamanhoArquivo = %d", tamanhoArquivo);
+    return matriculas;
 }
 
 int excluirAluno(struct aluno alunos[], int posicaoExcluir, int *totalAlunos) {
@@ -305,6 +389,10 @@ int excluirCurso(struct curso cursos[], int posicaoExcluir, int *totalCursos) {
     }
     (*totalCursos)--;
     return 1;
+}
+
+int excluirMatricula(struct matricula matriculas[], int posicaoExcluir, int *totalMatriculas) {
+
 }
 
 int incluirAluno(struct aluno *listaAlunos, int *posicao, int *quantAdicionados) {
@@ -570,6 +658,10 @@ int submenuAlterarCurso(struct curso cursos[], int posicaoAlterar, int *quantTot
     }
 }
 
+int submenuAlterarMatricula(struct matirculla matriculas[], int posicaoAlterar, int *quantTotal) {
+
+}
+
 void submenuRelatorios(int *opcao) {
     printf("\n=============================");
     printf("\nSubmenu Relatórios:");
@@ -593,13 +685,6 @@ void submenuAlterarExcluir(int *opcao) {
     scanf("%d", opcao);
 }
 
-void MensagemErroCadastro() {
-    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-    printf("\nNão foi possível concluir o cadastro.");
-    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-    printf("\n");
-}
-
 void submenuAlunos(struct aluno alunos[], char *cpf, int *quantTotal, int quantArquivo) {
     int opcao, posicao, resultado, resultSobrescrever, i;
     int quantAdicionados = 0;
@@ -611,10 +696,7 @@ void submenuAlunos(struct aluno alunos[], char *cpf, int *quantTotal, int quantA
             if(opcao == 1) {
                 system("clear||cls");
                 if(*quantTotal == 0) {
-                    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    printf("\nNão há nenhum cadastro no sistema.");
-                    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    printf("\n");
+                    naoHaCadastro();
                 }
                 else {
                     printf("\n=============================");
@@ -633,20 +715,14 @@ void submenuAlunos(struct aluno alunos[], char *cpf, int *quantTotal, int quantA
 
                     posicao = verificarCPF(alunos, cpf, quantTotal);
                     if(posicao < 0) {
-                        printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                        printf("\nCPF não encontrado no sistema.");
-                        printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                        printf("\n");
+                        cpfNaoEncontrado();
                     }
                     else {
                         imprimirAluno(alunos, posicao);
                     }
                 }
                 else {
-                    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    printf("\nNão há nenhum cadastro no sistema.");
-                    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    printf("\n");
+                    naoHaCadastro();
                 }
             }
             else if(opcao == 3) {
@@ -693,17 +769,15 @@ void submenuAlunos(struct aluno alunos[], char *cpf, int *quantTotal, int quantA
                 if(posicao >= 0) {
                     if(opcao == 1) {
                         resultado = submenuAlterarAluno(alunos, posicao, quantTotal);
-                        if(resultado == 1) {
-                            resultSobrescrever = sobrescreverArqAlunos("alunos.dat", alunos, *quantTotal);
-                            if(resultSobrescrever == 1) {
-                                mensagemAlterarSucesso();
-                            }
+                        resultSobrescrever = sobrescreverArqAlunos(alunos, *quantTotal);
+                        if(resultSobrescrever == 1 && resultado == 1) {
+                            mensagemAlterarSucesso();
                         }
                     }
                     else if(opcao == 2) {
                         if(*quantTotal > 1) {
                             resultado = excluirAluno(alunos, posicao, quantTotal); //altera o vetor
-                            resultSobrescrever = sobrescreverArqAlunos("alunos.dat", alunos, *quantTotal); //altera o arquivo 
+                            resultSobrescrever = sobrescreverArqAlunos(alunos, *quantTotal); //altera o arquivo 
 
                             if(resultado == 1 && resultSobrescrever == 1) {
                                 printf("\n=============================");
@@ -729,10 +803,7 @@ void submenuAlunos(struct aluno alunos[], char *cpf, int *quantTotal, int quantA
                     }
                 }
                 else {
-                    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    printf("\nCPF não encontrado no sistema.");
-                    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    printf("\n");
+                    cpfNaoEncontrado();
                 }
             }
                
@@ -773,28 +844,30 @@ void submenuCursos(struct curso cursos[], char *codigo, int *quantTotal, int qua
                 }
             }
             else {
-                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                printf("\nNão há nenhum cadastro no sistema.");
-                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                printf("\n");
+                naoHaCadastro();
             }
         } 
         else if(opcao == 2) {
-            printf("\nInforme o código do curso:");
-            getchar();
-            fgets(codigo, 11, stdin);
-            codigo[strcspn(codigo, "\n")] = '\0';
+            if(*quantTotal > 0) {
+                printf("\nInforme o código do curso:");
+                getchar();
+                fgets(codigo, 11, stdin);
+                codigo[strcspn(codigo, "\n")] = '\0';
 
-            posicao = verificarCodigo(cursos, codigo, quantTotal);
-            
-            if(posicao < 0) {
-                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                printf("\nCódigo não encontrado no sistema.");
-                printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                printf("\n");
+                posicao = verificarCodigo(cursos, codigo, quantTotal);
+                
+                if(posicao < 0) {
+                    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    printf("\nCódigo não encontrado no sistema.");
+                    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    printf("\n");
+                }
+                else {
+                    imprimirCurso(cursos, posicao);
+                }
             }
             else {
-                imprimirCurso(cursos, posicao);
+                naoHaCadastro();
             }
         }
         else if(opcao == 3) {
@@ -840,7 +913,7 @@ void submenuCursos(struct curso cursos[], char *codigo, int *quantTotal, int qua
                 else if(opcao == 2) {
                     if(*quantTotal > 1) {
                         resultado = excluirCurso(cursos, posicao, quantTotal); //altera o vetor
-                        resultSobrescrever = sobrescreverArqCursos("cursos.dat", cursos, *quantTotal); //altera o arquivo 
+                        resultSobrescrever = sobrescreverArqCursos(cursos, *quantTotal); //altera o arquivo 
 
                         if(resultado == 1 && resultSobrescrever == 1) {
                             printf("\n=============================");
@@ -885,21 +958,27 @@ void submenuCursos(struct curso cursos[], char *codigo, int *quantTotal, int qua
     }
 }
 
-void submenuMatricula(struct matricula matriculas[], struct aluno alunos[], struct curso cursos[]) {
+void submenuMatricula(struct matricula matriculas[], struct aluno alunos[], struct curso cursos[], int *quantTotal, int quantArquivo) {
     int opcao, quantMatriculas = 0, quantAlunos = 0, quantCursos = 0, i, posicao, resultado;
+    int quantMAtriculasAdicionadas = 0;
     char *cpf, *codigo;
 
-    if(matriculas != NULL && cpf != NULL && codigo != NULL) {
+    do {
         printf("\n=============================");
         printf("\nSubmenu de Matrícula");
         submenu(&opcao);
         switch(opcao) {
             case 1:
                 system("clear||cls");
-                printf("\n=============================");
-                printf("\nTodas as matrículas cadastradas:");
-                for(i = 0; i < quantMatriculas; i++) {
-                    imprimirMatricula(matriculas, i);
+                if(*quantTotal > 0) {
+                    printf("\n=============================");
+                    printf("\nTodas as matrículas cadastradas:");
+                    for(i = 0; i < quantMatriculas; i++) {
+                        imprimirMatricula(matriculas, i);
+                    }
+                }
+                else {
+
                 }
                 break;
             case 2:
@@ -911,9 +990,9 @@ void submenuMatricula(struct matricula matriculas[], struct aluno alunos[], stru
                 
                 //printf("%d", posicao); - teste
                 
-                /*if(posicao < 0) {
-
-                }*/
+                if(posicao < 0) {
+                    printf("\nCPF ou Código do curso não encontrado");
+                }
                 break;
             case 3:
                 system("clear||cls");
@@ -960,8 +1039,19 @@ void submenuMatricula(struct matricula matriculas[], struct aluno alunos[], stru
                 ImprimirMensagemDeErro();
         }
     }
-    else {
-        MensagemErroAloca();
+    while(opcao != 5);
+    if(opcao == 5) {
+        inserirEmArqMatricula(matriculas, &quantMAtriculasAdicionadas, quantArquivo); //Quando o submenu for fechado, os dados do vetor vão pro arquivo
+        free(cursos); //sendo quantAdicionados > 0 ou não, o vetor deve ser liberado
+        free(alunos);
+        free(matriculas);
+
+        system("clear||cls");
+
+        printf("\n=============================");
+        printf("\nSaindo do submenu de Matriculas");
+        printf("\n=============================");
+        printf("\n");
     }
 }
 
@@ -974,8 +1064,8 @@ void Relatorios() {
 
 void mainMenu() {
     int opcao, opcaoSubmenu, opcaoAlterarExcluir, opcaoSubmenuAlterar;
-    int quantAlunosArquivo = 0, quantCursosArquivo = 0, quantMatriculas = 0, resultado, posicao, i;
-    int quantTotalAlunos = 0, quantTotalCursos = 0;
+    int quantAlunosArquivo = 0, quantCursosArquivo = 0, quantMatriculasArquivo = 0, resultado, posicao, i;
+    int quantTotalAlunos = 0, quantTotalCursos = 0, quantTotalMatriculas = 0;
     int limiteAlunos = 100, limiteCursos = 50, limiteMatriculas = 200;
     char *cpf, *codigo;
  
@@ -983,7 +1073,7 @@ void mainMenu() {
     struct curso *cursos;
     struct matricula *matriculas;
 
-    matriculas = (struct matricula*) malloc (limiteMatriculas * sizeof(struct matricula));
+    //matriculas = (struct matricula*) malloc (limiteMatriculas * sizeof(struct matricula));
 
     cpf = (char *) malloc(sizeof (char) * 16); 
     codigo = (char *) malloc(sizeof(char) * 12);
@@ -1024,7 +1114,19 @@ void mainMenu() {
             }
         }
         else if(opcao == 3) {
-            submenuMatricula(matriculas, alunos, cursos);
+            alunos = leituraAlunos(limiteAlunos, &quantAlunosArquivo);
+            cursos = leituraCursos(limiteCursos, &quantCursosArquivo);
+            matriculas = leituraMatriculas(limiteMatriculas, &quantMatriculasArquivo);
+            quantTotalAlunos = quantAlunosArquivo;
+            quantTotalCursos = quantCursosArquivo;
+            quantTotalMatriculas = quantMatriculasArquivo;
+
+            if(matriculas != NULL && alunos != NULL && cursos != NULL) {
+                submenuMatricula(matriculas, alunos, cursos, &quantTotalMatriculas, quantMatriculasArquivo);
+            }
+            else {
+                MensagemErroAloca();
+            }
         }
         else if(opcao == 4) {
             Relatorios();
