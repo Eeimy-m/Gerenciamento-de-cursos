@@ -388,7 +388,14 @@ int excluirCurso(struct curso cursos[], int posicaoExcluir, int *totalCursos) {
 }
 
 int excluirMatricula(struct matricula matriculas[], int posicaoExcluir, int *totalMatriculas) {
-
+    int i;
+    for(i = posicaoExcluir; i < *totalMatriculas; i++) {
+        matriculas[i].desconto = matriculas[i+1].desconto;
+        strcpy(matriculas[i].dataInicio, matriculas[i+1].dataInicio);
+        strcpy(matriculas[i].dataFim, matriculas[i+1].dataFim);
+    }
+    (*totalMatriculas)--;
+    return 1;
 }
 
 int incluirAluno(struct aluno *listaAlunos, int *posicao, int *quantAdicionados) {
@@ -640,7 +647,43 @@ int submenuAlterarCurso(struct curso cursos[], int posicaoAlterar, int *quantTot
 }
 
 int submenuAlterarMatricula(struct matricula matriculas[], int posicaoAlterar, int *quantTotal) {
-
+    int alterou = 0, opcao;
+    do{
+        printf("\n============================="); 
+        printf("\n1- Desconto");
+        printf("\n2- Data de início");
+        printf("\n3- Data de conclusão");
+        printf("\n4- Sair");
+        printf("\n============================="); 
+        printf("\n");
+        printf("\nSelecione uma das opções:");
+        scanf("%d", opcao);
+        switch(opcao) {
+            case 1:
+                printf("\nDesconto:");
+                scanf("%f", &matriculas[posicaoAlterar].desconto);
+                alterou = 1;
+                break;
+            case 2:
+                printf("\nData de início: ");
+                scanf("%s", matriculas[posicaoAlterar].dataInicio);
+                alterou = 1;
+                break;
+            case 3:
+                printf("\nData de conclusão: ");
+                scanf("%s", matriculas[posicaoAlterar].dataFim);
+                alterou = 1;
+                break;
+            default:
+            if(opcao != 4) {
+                ImprimirMensagemDeErro();
+            }
+        }
+    }
+    while(opcao != 4);
+    if(opcao == 4) {
+        return alterou;
+    }
 }
 
 void submenuRelatorios(int *opcao) {
@@ -753,6 +796,9 @@ void submenuAlunos(struct aluno alunos[], char *cpf, int *quantTotal, int quantA
                         resultSobrescrever = sobrescreverArqAlunos(alunos, *quantTotal);
                         if(resultSobrescrever == 1 && resultado == 1) {
                             mensagemAlterarSucesso();
+                        }
+                        else {
+                            mensagemErroAlterar();
                         }
                     }
                     else if(opcao == 2) {
@@ -940,7 +986,7 @@ void submenuCursos(struct curso cursos[], char *codigo, int *quantTotal, int qua
 }
 
 void submenuMatricula(struct matricula *matriculas, struct aluno *alunos, struct curso *cursos, int *quantTotalMatriculas, int quantArquivo, int quantAlunos, int quantCursos, char *cpf, char *codigo) {
-    int opcao, quantMatriculasAdd = 0, i, posicao, resultado;
+    int opcao, quantMatriculasAdd = 0, i, posicao, resultado, resultadoSobrescrever;
 
     do {
         printf("\n=============================");
@@ -1029,11 +1075,62 @@ void submenuMatricula(struct matricula *matriculas, struct aluno *alunos, struct
                 break;
             case 4:
                 submenuAlterarExcluir(&opcao);
-                if(opcao == 1) {
-
-                }
-                else if(opcao == 2) {
-
+                printf("\nInforme o CPF do aluno: ");
+                scanf("%s", cpf);
+                printf("\nInforme o código do curso: ");
+                scanf("%s", codigo);
+                if(verificarCPF(alunos, cpf, &quantAlunos) >= 0 && verificarCodigo(cursos, codigo, &quantCursos) >= 0) {
+                    posicao = verificarCodigoeCPFMatricula(matriculas, codigo, cpf, *quantTotalMatriculas);
+                    if(posicao >= 0) {
+                        if(opcao == 1) {
+                            resultado = submenuAlterarMatricula(matriculas, posicao, quantTotalMatriculas);
+                            resultadoSobrescrever = sobrescreverArqMatriculas(matriculas, *quantTotalMatriculas);
+                            if(resultado == 1 && resultadoSobrescrever == 1) {
+                                mensagemAlterarSucesso();
+                            }
+                            else {
+                               mensagemErroAlterar(); 
+                            }
+                        }
+                        else if(opcao == 2) {
+                            if(*quantTotalMatriculas > 1) {
+                                resultado = excluirMatricula(matriculas, posicao, quantTotalMatriculas);
+                                resultadoSobrescrever = sobrescreverArqMatriculas(matriculas, *quantTotalMatriculas);
+                                if(resultado == 1 && resultadoSobrescrever == 1) {
+                                    printf("\n=============================");
+                                    printf("\nMatrícula removida do sistema com sucesso!");
+                                    printf("\n=============================");
+                                    printf("\n");
+                                }
+                                else {
+                                    ErroNaExclusao();
+                                }
+                            }
+                            else if(*quantTotalMatriculas == 1) {
+                                if(remove("matriculas.dat") == 0 && excluirMatricula(matriculas, 0, quantTotalMatriculas) == 1) {
+                                    printf("\n=============================");
+                                    printf("\nMatrícula removida do sistema com sucesso!");
+                                    printf("\n=============================");
+                                    printf("\n"); 
+                                }
+                                else {
+                                    ErroNaExclusao();
+                                }
+                            }
+                        }
+                        else {
+                            ImprimirMensagemDeErro();
+                        }
+                    }
+                    else if(posicao == -1) {
+                        printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                        printf("\nMatrícula procurada não foi encontrada");
+                        printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                        printf("\n");
+                    }
+                    else if(posicao == -2) {
+                        naoHaCadastro();
+                    }
                 }
                 break;
             default:
