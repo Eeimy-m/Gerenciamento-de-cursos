@@ -14,7 +14,7 @@ struct curso {
 
 struct matricula {//Não pode existir mais de um mesmo cpf com um mesmo código de curso
     float desconto;
-    char codigoCurso[10], dataInicio, dataFim, cpfAluno[14];
+    char codigoCurso[10], dataInicio[11], dataFim[11], cpfAluno[14];
 };
 
 void naoHaCadastro() {
@@ -140,11 +140,11 @@ void imprimirMatricula(struct matricula matriculas[], int n) {
     printf("\n");
     printf("\nCPF do aluno: %s", matriculas[n].cpfAluno);
     printf("\n");
+    printf("\nDesconto: %f", matriculas[n].desconto);
+    printf("\n");
     printf("\nData de início: %s", matriculas[n].dataInicio);
     printf("\n");
     printf("\nData de conclusão: %s", matriculas[n].dataFim);
-    printf("\n");
-    printf("\nDesconto: %f", matriculas[n].desconto);
     printf("\n=============================");
     printf("\n");
 }
@@ -153,17 +153,14 @@ void inserirEmArqCursos(struct curso cursos[], int *quantAdicionados, int quantJ
     FILE *arq;
     arq = fopen("cursos.dat", "ab");
     if(arq == NULL) {
-        printf("Não foi possível abrir o arquivo.");
-        fclose(arq);
-        exit(0);
+        NaoFoiPossivelAbrirOArq(arq);
     }
 
     if(*quantAdicionados > 0) {
         if((fwrite(cursos + quantJaNoArquivo, sizeof(struct curso), *quantAdicionados, arq)) != *quantAdicionados) {
-            // printf("\nErro na escrita");
-            // fclose(arq);
-            // exit(0);
-            NaoFoiPossivelAbrirOArq(arq);
+            printf("\nErro na escrita");
+            fclose(arq);
+            exit(0);
         } 
     }
     fclose(arq);
@@ -198,7 +195,7 @@ void inserirEmArqMatricula(struct matricula matriculas[], int *quantAdicionados,
     }
 
     if(*quantAdicionados > 0) {
-        if((fwrite(matriculas + quantJaNoArquivo, sizeof(struct curso), *quantAdicionados, arq)) != *quantAdicionados) {
+        if((fwrite(matriculas + quantJaNoArquivo, sizeof(struct matricula), *quantAdicionados, arq)) != *quantAdicionados) {
             printf("\nErro na escrita");
             fclose(arq);
             exit(0);
@@ -321,7 +318,6 @@ struct curso *leituraCursos(int limiteCursos, int *quantCursos) { //Lê os dados
 
     fclose(arq);
     *quantCursos = (int) lidos;
-    printf("\nTamanhoArquivo = %d", tamanhoArquivo);
     return cursos;
 }
 
@@ -448,15 +444,16 @@ int incluirCurso(struct curso listaCursos[], int *posicao, int *quantAdicionados
     return 1;
 }
 
-int incluirMatricula(struct matricula matriculas[], int *quant) {
-    //fazer verificação do código do curso e do cpf (se existem ou não e se já tem alguma matrícula igual)
+int incluirMatricula(struct matricula matriculas[], int *posicao, int *quantAdicionados) {
     printf("\nDesconto:");
-    scanf("%f", &matriculas[*quant].desconto);
+    scanf("%f", &matriculas[*posicao].desconto);
     printf("\nData de início: ");
-    scanf("%s", &matriculas[*quant].dataInicio);
+    scanf("%s", matriculas[*posicao].dataInicio);
     printf("\nData de conclusão: ");
-    scanf("%s", &matriculas[*quant].dataFim);
-    (*quant)++;
+    scanf("%s", matriculas[*posicao].dataFim);
+
+    (*quantAdicionados)++;
+    (*posicao)++;
     return 1;
 }
 
@@ -479,7 +476,7 @@ int verificarCPF(struct aluno listaAlunos[], char *cpf, int *quantAlunos) {
 int verificarCodigo(struct curso listaCursos[], char *codigo, int *quantCursos) {
     int i;
     if(*quantCursos == 0) {
-        return -1;
+        return -1; //vetor vazio
     }
     else {
         for(i = 0; i < *quantCursos; i++) {
@@ -487,42 +484,26 @@ int verificarCodigo(struct curso listaCursos[], char *codigo, int *quantCursos) 
                 return i;
             }
         }
-        return -1;
+        return -1; //Não vazio, mas codigo não encontrado
     }
 }
 
 int verificarCodigoeCPFMatricula(struct matricula matriculas[], char *codigo, char *cpf, int quantMatriculas) {
-    int i, j, contadorCPF = 0, contadorCodigo = 0;
-    int posicoesCPF[contadorCPF];
-    int posicoesCodigo[contadorCodigo];
+    int i, j;
 
     if(quantMatriculas == 0) {
-        return -1;
+        printf("\nVetor vazio");
+        return -2; //vetor vazio 
     }
 
     else {
         for(i = 0; i < quantMatriculas; i++) {
-        if(codigo == matriculas[i].codigoCurso) {
-            posicoesCodigo[contadorCodigo] = i;
-            contadorCodigo++;
-        }
-        }
-
-        for(i = 0; i < quantMatriculas; i++) {
-            if(cpf == matriculas[i].cpfAluno) {
-                posicoesCPF[contadorCPF] = i;
-                contadorCPF++;
+            if(strcmp(cpf, matriculas[i].cpfAluno) == 0 && strcmp(codigo, matriculas[i].codigoCurso) == 0) {
+                return i;
             }
         }
-
-        for(i = 0; i < contadorCodigo; i++) { //ocupam o mesmo endereço na lista de structs de matrícula = essa matrícula já existe
-            for(j = 0; j < contadorCPF; j++) {
-                if(posicoesCodigo[i] == posicoesCPF[j]) {
-                    return i;
-                }
-            }
-        }
-        return -1;
+        printf("\nvetor não vazio mas matrícula procurada não existe");
+        return -1; //vetor não vazio mas matrícula procurada não existe
     } 
 }
 
@@ -658,7 +639,7 @@ int submenuAlterarCurso(struct curso cursos[], int posicaoAlterar, int *quantTot
     }
 }
 
-int submenuAlterarMatricula(struct matirculla matriculas[], int posicaoAlterar, int *quantTotal) {
+int submenuAlterarMatricula(struct matricula matriculas[], int posicaoAlterar, int *quantTotal) {
 
 }
 
@@ -958,10 +939,8 @@ void submenuCursos(struct curso cursos[], char *codigo, int *quantTotal, int qua
     }
 }
 
-void submenuMatricula(struct matricula matriculas[], struct aluno alunos[], struct curso cursos[], int *quantTotal, int quantArquivo) {
-    int opcao, quantMatriculas = 0, quantAlunos = 0, quantCursos = 0, i, posicao, resultado;
-    int quantMAtriculasAdicionadas = 0;
-    char *cpf, *codigo;
+void submenuMatricula(struct matricula *matriculas, struct aluno *alunos, struct curso *cursos, int *quantTotalMatriculas, int quantArquivo, int quantAlunos, int quantCursos, char *cpf, char *codigo) {
+    int opcao, quantMatriculasAdd = 0, i, posicao, resultado;
 
     do {
         printf("\n=============================");
@@ -970,28 +949,41 @@ void submenuMatricula(struct matricula matriculas[], struct aluno alunos[], stru
         switch(opcao) {
             case 1:
                 system("clear||cls");
-                if(*quantTotal > 0) {
+                if(*quantTotalMatriculas > 0) {
                     printf("\n=============================");
                     printf("\nTodas as matrículas cadastradas:");
-                    for(i = 0; i < quantMatriculas; i++) {
+                    for(i = 0; i < *quantTotalMatriculas; i++) {
                         imprimirMatricula(matriculas, i);
                     }
                 }
                 else {
-
+                    naoHaCadastro();
                 }
                 break;
             case 2:
-                printf("\nInforme o cpf do aluno:");
-                scanf("%s", cpf);
-                printf("\nInforme o código do curso:");
-                scanf("%s", codigo);
-                posicao = verificarCodigoeCPFMatricula(matriculas, codigo, cpf, quantMatriculas);
-                
-                //printf("%d", posicao); - teste
-                
-                if(posicao < 0) {
-                    printf("\nCPF ou Código do curso não encontrado");
+                if(*quantTotalMatriculas > 0) {
+                    printf("\nInforme o cpf do aluno:");
+                    scanf("%s", cpf);
+                    printf("\nInforme o código do curso:");
+                    scanf("%s", codigo);
+                    if(verificarCPF(alunos, cpf, &quantAlunos) >= 0 && verificarCodigo(cursos, codigo, &quantCursos) >= 0) {
+                        posicao = verificarCodigoeCPFMatricula(matriculas, codigo, cpf, *quantTotalMatriculas);
+                        if(posicao == -1) {
+                            printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                            printf("\nMatrícula procurada não foi encontrada");
+                            printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                            printf("\n");
+                        }
+                        else if(posicao == -2) {
+                            naoHaCadastro();
+                        }
+                        else if(posicao >= 0) {
+                            imprimirMatricula(matriculas, posicao);
+                        }
+                    }
+                }
+                else {
+                    naoHaCadastro();
                 }
                 break;
             case 3:
@@ -1005,14 +997,12 @@ void submenuMatricula(struct matricula matriculas[], struct aluno alunos[], stru
                 scanf("%s", codigo);
 
                 if(verificarCPF(alunos, cpf, &quantAlunos) >= 0 && verificarCodigo(cursos, codigo, &quantCursos) >= 0) {
-                    posicao = verificarCodigoeCPFMatricula(matriculas, codigo, cpf, quantMatriculas);
+                    posicao = verificarCodigoeCPFMatricula(matriculas, codigo, cpf, *quantTotalMatriculas);
                     if(posicao < 0) {
-                        strcpy(matriculas[quantMatriculas].codigoCurso, codigo);
-                        strcpy(matriculas[quantMatriculas].cpfAluno, cpf);
-                        free(cpf);
-                        free(codigo);
+                        strcpy(matriculas[*quantTotalMatriculas].codigoCurso, codigo);
+                        strcpy(matriculas[*quantTotalMatriculas].cpfAluno, cpf);
 
-                        resultado = incluirMatricula(matriculas, &quantMatriculas);
+                        resultado = incluirMatricula(matriculas, quantTotalMatriculas, &quantMatriculasAdd);
                         if(resultado == 1) {
                             printf("\n=============================");
                             printf("\nMatrícula cadastrada com sucesso!");
@@ -1030,18 +1020,31 @@ void submenuMatricula(struct matricula matriculas[], struct aluno alunos[], stru
                         printf("\n");
                     }
                 }
-
+                else {
+                    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    printf("\nCPF/Código de curso não encontrados no sistema");
+                    printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    printf("\n");
+                }
                 break;
             case 4:
-                printf("Alterar ou excluir do sistema");
+                submenuAlterarExcluir(&opcao);
+                if(opcao == 1) {
+
+                }
+                else if(opcao == 2) {
+
+                }
                 break;
             default:
-                ImprimirMensagemDeErro();
+                if(opcao != 5) {
+                    ImprimirMensagemDeErro();
+                }
         }
     }
     while(opcao != 5);
     if(opcao == 5) {
-        inserirEmArqMatricula(matriculas, &quantMAtriculasAdicionadas, quantArquivo); //Quando o submenu for fechado, os dados do vetor vão pro arquivo
+        inserirEmArqMatricula(matriculas, &quantMatriculasAdd, quantArquivo); //Quando o submenu for fechado, os dados do vetor vão pro arquivo
         free(cursos); //sendo quantAdicionados > 0 ou não, o vetor deve ser liberado
         free(alunos);
         free(matriculas);
@@ -1122,7 +1125,7 @@ void mainMenu() {
             quantTotalMatriculas = quantMatriculasArquivo;
 
             if(matriculas != NULL && alunos != NULL && cursos != NULL) {
-                submenuMatricula(matriculas, alunos, cursos, &quantTotalMatriculas, quantMatriculasArquivo);
+                submenuMatricula(matriculas, alunos, cursos, &quantTotalMatriculas, quantMatriculasArquivo, quantTotalAlunos, quantTotalCursos, cpf, codigo);
             }
             else {
                 MensagemErroAloca();
