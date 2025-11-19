@@ -657,7 +657,7 @@ int submenuAlterarMatricula(struct matricula matriculas[], int posicaoAlterar, i
         printf("\n============================="); 
         printf("\n");
         printf("\nSelecione uma das opções:");
-        scanf("%d", opcao);
+        scanf("%d", &opcao);
         switch(opcao) {
             case 1:
                 printf("\nDesconto:");
@@ -703,6 +703,7 @@ void submenuAlterarExcluir(int *opcao) {
     printf("\n=============================");
     printf("\n1- Alterar");
     printf("\n2- Excluir");
+    printf("\n3- Sair");
     printf("\n=============================");
     printf("\n");
     printf("\nSelecione uma das opções acima: ");
@@ -785,55 +786,61 @@ void submenuAlunos(struct aluno alunos[], char *cpf, int *quantTotal, int quantA
             }  
                
             else if(opcao == 4) {
-                submenuAlterarExcluir(&opcao);
-                printf("\nInforme o cpf do aluno:");
-                scanf("%s", cpf);
-                posicao = verificarCPF(alunos, cpf, quantTotal);
+                do {
+                    submenuAlterarExcluir(&opcao);
+                    if(opcao == 3) {
+                        return;
+                    }
+                    printf("\nInforme o cpf do aluno:");
+                    scanf("%s", cpf);
+                    posicao = verificarCPF(alunos, cpf, quantTotal);
 
-                if(posicao >= 0) {
-                    if(opcao == 1) {
-                        resultado = submenuAlterarAluno(alunos, posicao, quantTotal);
-                        resultSobrescrever = sobrescreverArqAlunos(alunos, *quantTotal);
-                        if(resultSobrescrever == 1 && resultado == 1) {
-                            mensagemAlterarSucesso();
+                    if(posicao >= 0) {
+                        if(opcao == 1) {
+                            resultado = submenuAlterarAluno(alunos, posicao, quantTotal);
+                            resultSobrescrever = sobrescreverArqAlunos(alunos, *quantTotal);
+                            if(resultSobrescrever == 1 && resultado == 1) {
+                                mensagemAlterarSucesso();
+                            }
+                            else {
+                                mensagemErroAlterar();
+                            }
+                        }
+                        else if(opcao == 2) {
+                            if(*quantTotal > 1) {
+                                resultado = excluirAluno(alunos, posicao, quantTotal); //altera o vetor
+                                resultSobrescrever = sobrescreverArqAlunos(alunos, *quantTotal); //altera o arquivo 
+
+                                if(resultado == 1 && resultSobrescrever == 1) {
+                                    printf("\n=============================");
+                                    printf("\nAluno removido do sistema com sucesso!");
+                                    printf("\n=============================");
+                                    printf("\n");   
+                                }
+                                else {
+                                    ErroNaExclusao();
+                                }
+                            }
+                            else if(*quantTotal == 1) {
+                                if(remove("alunos.dat") == 0 && excluirAluno(alunos, 0, quantTotal) == 1) {
+                                    printf("\nArquivo de alunos deletado com sucesso!");
+                                }
+                                else {
+                                    printf("\nNão foi possível excluir o arquivo");
+                                }
+                            }
                         }
                         else {
-                            mensagemErroAlterar();
-                        }
-                    }
-                    else if(opcao == 2) {
-                        if(*quantTotal > 1) {
-                            resultado = excluirAluno(alunos, posicao, quantTotal); //altera o vetor
-                            resultSobrescrever = sobrescreverArqAlunos(alunos, *quantTotal); //altera o arquivo 
-
-                            if(resultado == 1 && resultSobrescrever == 1) {
-                                printf("\n=============================");
-                                printf("\nAluno removido do sistema com sucesso!");
-                                printf("\n=============================");
-                                printf("\n");   
-                            }
-                            else {
-                                ErroNaExclusao();
-                            }
-                        }
-                        else if(*quantTotal == 1) {
-                            if(remove("alunos.dat") == 0 && excluirAluno(alunos, 0, quantTotal) == 1) {
-                                printf("\nArquivo de alunos deletado com sucesso!");
-                            }
-                            else {
-                                printf("\nNão foi possível excluir o arquivo");
-                            }
+                            ImprimirMensagemDeErro();
                         }
                     }
                     else {
-                        ImprimirMensagemDeErro();
+                        cpfNaoEncontrado();
                     }
                 }
-                else {
-                    cpfNaoEncontrado();
-                }
+                while(opcao != 3);
             }
-               
+
             else {
                 ImprimirMensagemDeErro();
             }
@@ -928,43 +935,53 @@ void submenuCursos(struct curso cursos[], char *codigo, int *quantTotal, int qua
             }
         }
         else if(opcao == 4) {
-            printf("\nInforme o código do curso:");
-            scanf("%s", codigo);
-            posicao = verificarCodigo(cursos, codigo, quantTotal);
-
-            if(posicao >= 0) {
+            do {
                 submenuAlterarExcluir(&opcao);
-                if(opcao == 1) {
-                    submenuAlterarCurso(cursos, posicao, quantTotal);
+                if(opcao == 3) {
+                    return;
                 }
-                else if(opcao == 2) {
-                    if(*quantTotal > 1) {
-                        resultado = excluirCurso(cursos, posicao, quantTotal); //altera o vetor
-                        resultSobrescrever = sobrescreverArqCursos(cursos, *quantTotal); //altera o arquivo 
+                printf("\nInforme o código do curso:");
+                scanf("%s", codigo);
+                posicao = verificarCodigo(cursos, codigo, quantTotal);
 
-                        if(resultado == 1 && resultSobrescrever == 1) {
-                            printf("\n=============================");
-                            printf("\nCurso removido do sistema com sucesso!");
-                            printf("\n=============================");
-                            printf("\n");   
+                if(posicao >= 0) {
+                    submenuAlterarExcluir(&opcao);
+                    if(opcao == 1) {
+                        submenuAlterarCurso(cursos, posicao, quantTotal);
+                    }
+                    else if(opcao == 2) {
+                        if(*quantTotal > 1) {
+                            resultado = excluirCurso(cursos, posicao, quantTotal); //altera o vetor
+                            resultSobrescrever = sobrescreverArqCursos(cursos, *quantTotal); //altera o arquivo 
+
+                            if(resultado == 1 && resultSobrescrever == 1) {
+                                printf("\n=============================");
+                                printf("\nCurso removido do sistema com sucesso!");
+                                printf("\n=============================");
+                                printf("\n");   
+                            }
+                            else {
+                                ErroNaExclusao();
+                            }
                         }
-                        else {
-                            ErroNaExclusao();
+                        else if(*quantTotal == 1) {
+                            if(remove("cursos.dat") == 0 && excluirCurso(cursos, 0, quantTotal) == 1) {
+                                printf("\n=============================");
+                                printf("\nCurso removido do sistema com sucesso!");
+                                printf("\n=============================");
+                                printf("\n");   
+                            }
+                            else {
+                                ErroNaExclusao();
+                            }
                         }
                     }
-                    else if(*quantTotal == 1) {
-                        if(remove("cursos.dat") == 0 && excluirCurso(cursos, 0, quantTotal) == 1) {
-                            
-                        }
-                        else {
-                            printf("\nNão foi possível excluir o arquivo");
-                        }
+                    else {
+                        ImprimirMensagemDeErro();
                     }
-                }
-                else {
-                    ImprimirMensagemDeErro();
                 }
             }
+            while(opcao != 3);
         }
         else if(opcao < 1 || opcao > 5) {
             ImprimirMensagemDeErro();
@@ -1059,6 +1076,12 @@ void submenuMatricula(struct matricula *matriculas, struct aluno *alunos, struct
                             MensagemErroCadastro();
                         }
                     }
+                    else if(posicao == -1) {
+                        printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                        printf("\nMatrícula procurada não foi encontrada");
+                        printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                        printf("\n");
+                    }
                     else {
                         printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                         printf("\nA matrícula inserida já existe no sistema.");
@@ -1074,64 +1097,70 @@ void submenuMatricula(struct matricula *matriculas, struct aluno *alunos, struct
                 }
                 break;
             case 4:
-                submenuAlterarExcluir(&opcao);
-                printf("\nInforme o CPF do aluno: ");
-                scanf("%s", cpf);
-                printf("\nInforme o código do curso: ");
-                scanf("%s", codigo);
-                if(verificarCPF(alunos, cpf, &quantAlunos) >= 0 && verificarCodigo(cursos, codigo, &quantCursos) >= 0) {
-                    posicao = verificarCodigoeCPFMatricula(matriculas, codigo, cpf, *quantTotalMatriculas);
-                    if(posicao >= 0) {
-                        if(opcao == 1) {
-                            resultado = submenuAlterarMatricula(matriculas, posicao, quantTotalMatriculas);
-                            resultadoSobrescrever = sobrescreverArqMatriculas(matriculas, *quantTotalMatriculas);
-                            if(resultado == 1 && resultadoSobrescrever == 1) {
-                                mensagemAlterarSucesso();
-                            }
-                            else {
-                               mensagemErroAlterar(); 
-                            }
-                        }
-                        else if(opcao == 2) {
-                            if(*quantTotalMatriculas > 1) {
-                                resultado = excluirMatricula(matriculas, posicao, quantTotalMatriculas);
+                do {
+                    submenuAlterarExcluir(&opcao);
+                    if(opcao == 3) {
+                        return;
+                    }
+                    printf("\nInforme o CPF do aluno: ");
+                    scanf("%s", cpf);
+                    printf("\nInforme o código do curso: ");
+                    scanf("%s", codigo);
+                    if(verificarCPF(alunos, cpf, &quantAlunos) >= 0 && verificarCodigo(cursos, codigo, &quantCursos) >= 0) {
+                        posicao = verificarCodigoeCPFMatricula(matriculas, codigo, cpf, *quantTotalMatriculas);
+                        if(posicao >= 0) {
+                            if(opcao == 1) {
+                                resultado = submenuAlterarMatricula(matriculas, posicao, quantTotalMatriculas);
                                 resultadoSobrescrever = sobrescreverArqMatriculas(matriculas, *quantTotalMatriculas);
                                 if(resultado == 1 && resultadoSobrescrever == 1) {
-                                    printf("\n=============================");
-                                    printf("\nMatrícula removida do sistema com sucesso!");
-                                    printf("\n=============================");
-                                    printf("\n");
+                                    mensagemAlterarSucesso();
                                 }
                                 else {
-                                    ErroNaExclusao();
+                                mensagemErroAlterar(); 
                                 }
                             }
-                            else if(*quantTotalMatriculas == 1) {
-                                if(remove("matriculas.dat") == 0 && excluirMatricula(matriculas, 0, quantTotalMatriculas) == 1) {
-                                    printf("\n=============================");
-                                    printf("\nMatrícula removida do sistema com sucesso!");
-                                    printf("\n=============================");
-                                    printf("\n"); 
+                            else if(opcao == 2) {
+                                if(*quantTotalMatriculas > 1) {
+                                    resultado = excluirMatricula(matriculas, posicao, quantTotalMatriculas);
+                                    resultadoSobrescrever = sobrescreverArqMatriculas(matriculas, *quantTotalMatriculas);
+                                    if(resultado == 1 && resultadoSobrescrever == 1) {
+                                        printf("\n=============================");
+                                        printf("\nMatrícula removida do sistema com sucesso!");
+                                        printf("\n=============================");
+                                        printf("\n");
+                                    }
+                                    else {
+                                        ErroNaExclusao();
+                                    }
                                 }
-                                else {
-                                    ErroNaExclusao();
+                                else if(*quantTotalMatriculas == 1) {
+                                    if(remove("matriculas.dat") == 0 && excluirMatricula(matriculas, 0, quantTotalMatriculas) == 1) {
+                                        printf("\n=============================");
+                                        printf("\nMatrícula removida do sistema com sucesso!");
+                                        printf("\n=============================");
+                                        printf("\n"); 
+                                    }
+                                    else {
+                                        ErroNaExclusao();
+                                    }
                                 }
                             }
+                            else {
+                                ImprimirMensagemDeErro();
+                            }
                         }
-                        else {
-                            ImprimirMensagemDeErro();
+                        else if(posicao == -1) {
+                            printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                            printf("\nMatrícula procurada não foi encontrada");
+                            printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                            printf("\n");
                         }
-                    }
-                    else if(posicao == -1) {
-                        printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                        printf("\nMatrícula procurada não foi encontrada");
-                        printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                        printf("\n");
-                    }
-                    else if(posicao == -2) {
-                        naoHaCadastro();
+                        else if(posicao == -2) {
+                            naoHaCadastro();
+                        }
                     }
                 }
+                while(opcao != 3);
                 break;
             default:
                 if(opcao != 5) {
