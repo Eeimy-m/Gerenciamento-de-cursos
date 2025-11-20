@@ -351,7 +351,6 @@ struct matricula *leituraMatriculas(int limiteMatriculas, int *quantMatriculas) 
 
     fclose(arq);
     *quantMatriculas = (int) lidos;
-    printf("\nTamanhoArquivo = %d", tamanhoArquivo);
     return matriculas;
 }
 
@@ -512,6 +511,22 @@ int verificarCodigoeCPFMatricula(struct matricula matriculas[], char *codigo, ch
         printf("\nvetor não vazio mas matrícula procurada não existe");
         return -1; //vetor não vazio mas matrícula procurada não existe
     } 
+}
+
+int verificarCodigoParaRelatorio(struct aluno *alunos, struct matricula *matriculas, char *codigo, int quantMatriculas, int quantAlunos, int *listaPosicoes) {
+    int i, contador = 0, posicao;
+
+    for(i = 0; i < quantMatriculas; i++) {
+        if(strcmp(codigo, matriculas[i].codigoCurso) == 0) {
+            posicao = verificarCPF(alunos, matriculas[i].cpfAluno, &quantAlunos);
+            if(posicao >= 0) {
+                listaPosicoes[contador] = posicao;
+                contador++;
+            }
+        }
+    }
+    printf("%d", contador);
+    return contador;
 }
 
 void submenu(int *opcao) {
@@ -689,9 +704,10 @@ int submenuAlterarMatricula(struct matricula matriculas[], int posicaoAlterar, i
 void submenuRelatorios(int *opcao) {
     printf("\n=============================");
     printf("\nSubmenu Relatórios:");
-    printf("\n1- Mostrar dados de todos os alunos de um curso");
-    printf("\n2- Mostrar os dados de todos os cursos oferecidos entre as datas X e Y");
+    printf("\n1- Mostrar dados de todos os alunos de um curso"); //percorrer matrículas e procurar um código (pegar todos os cpfs dos alunos que tem matrícula ativa nesse curso)
+    printf("\n2- Mostrar os dados de todos os cursos oferecidos entre as datas X e Y"); 
     printf("\n3- Mostrar os dados de todos os cursos realizados por um aluno");
+    printf("\n4- Sair");
     printf("\n=============================");
     printf("\n");
     printf("\nSelecione uma das opções:");
@@ -1184,11 +1200,53 @@ void submenuMatricula(struct matricula *matriculas, struct aluno *alunos, struct
     }
 }
 
-void Relatorios() {
-    int opcao;
-    printf("\n=============================");
-    printf("Submenu de Relatórios");
-    submenuRelatorios(&opcao);
+void Relatorios(int quantTotalMatriculas, char *cpf, char *codigo, struct matricula *matriculas, struct curso *cursos, struct aluno *alunos, int quantCursos, int quantAlunos) {
+    int opcao, posicao, tamanhoLista, i;
+    int *listaPosicoes;
+    listaPosicoes = (int *) malloc (quantTotalMatriculas * sizeof(int));
+
+    do {
+        printf("\n=============================");
+        printf("Submenu de Relatórios");
+        submenuRelatorios(&opcao);
+
+        if(opcao == 1) {
+            //verificar se existem cadastros de matrículas
+            if(quantTotalMatriculas > 0) {
+                printf("\nInsira o código do curso: ");
+                getchar();
+                fgets(codigo, 11, stdin);
+                codigo[strcspn(codigo, "\n")] = '\0';
+
+                if(verificarCodigo(cursos, codigo, &quantCursos) >= 0) {
+                    tamanhoLista = verificarCodigoParaRelatorio(alunos, matriculas, codigo, quantTotalMatriculas, quantAlunos, listaPosicoes); //altera a lista 
+
+                    if(tamanhoLista > 0) {
+                        //listar todos os dados dos alunos encontrados
+                        for(i = 0; i < tamanhoLista; i++) {
+                            imprimirAluno(alunos, listaPosicoes[i]);
+                        }
+                    }
+                    else {
+                        naoHaCadastro();
+                    }
+                }
+            }
+            else {
+                naoHaCadastro();
+            }
+        }
+        else if(opcao == 2) {
+
+        }
+        else if(opcao == 3) {
+
+        }
+        else if(opcao < 1 || opcao > 4) {
+            ImprimirMensagemDeErro();
+        }
+    }
+    while(opcao != 4);
 }
 
 void mainMenu() {
@@ -1242,23 +1300,24 @@ void mainMenu() {
                 MensagemErroAloca();
             }
         }
-        else if(opcao == 3) {
+        else if(opcao == 3 || opcao == 4) {
             alunos = leituraAlunos(limiteAlunos, &quantAlunosArquivo);
             cursos = leituraCursos(limiteCursos, &quantCursosArquivo);
             matriculas = leituraMatriculas(limiteMatriculas, &quantMatriculasArquivo);
             quantTotalAlunos = quantAlunosArquivo;
             quantTotalCursos = quantCursosArquivo;
             quantTotalMatriculas = quantMatriculasArquivo;
-
-            if(matriculas != NULL && alunos != NULL && cursos != NULL) {
+            if(opcao == 3) {
+                if(matriculas != NULL && alunos != NULL && cursos != NULL) {
                 submenuMatricula(matriculas, alunos, cursos, &quantTotalMatriculas, quantMatriculasArquivo, quantTotalAlunos, quantTotalCursos, cpf, codigo);
+                }
+                else {
+                    MensagemErroAloca();
+                }
             }
-            else {
-                MensagemErroAloca();
+            else if(opcao == 4) {
+                Relatorios(quantTotalMatriculas, cpf, codigo, matriculas, cursos, alunos, quantTotalCursos, quantTotalAlunos);
             }
-        }
-        else if(opcao == 4) {
-            Relatorios();
         }
         else if(opcao > 5 || opcao <= 0) {
             ImprimirMensagemDeErro();
@@ -1266,7 +1325,7 @@ void mainMenu() {
     }
     while(opcao != 5);
     if(opcao == 5) { 
-        //system("clear||cls");
+        system("clear||cls");
 
         printf("\n");
         printf("\n=============================");
