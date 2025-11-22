@@ -580,8 +580,14 @@ int verificarDataRelatorio(struct matricula *matriculas, struct curso *cursos, i
         if(validarIntervaloDeData(diaMatricula, mesMatricula, anoMatricula, diaInseridoIni, mesInseridoIni, anoInseridoIni, diaInseridoFim, mesInseridoFim, anoInseridoFim) == 1) {
             posicao = verificarCodigo(cursos, matriculas[i].codigoCurso, &quantCursos);
             if(posicao >= 0) {
-                listaPosicoes[contador] = posicao;
-                contador++;
+                if(contador > 0 && listaPosicoes[contador - 1] != posicao) {
+                    listaPosicoes[contador] = posicao;
+                    contador++;
+                }
+                else if(contador == 0) {
+                    listaPosicoes[contador] = posicao;
+                    contador++;
+                }
             }
         } 
     }
