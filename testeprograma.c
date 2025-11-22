@@ -24,6 +24,13 @@ void nenhumaMatriculaEncontrada() {
     printf("\n");
 }
 
+void sucessoInserirArqRelatorios() {
+    printf("\n=============================");
+    printf("\nDados inseridos no arquivo com sucesso!");
+    printf("\n=============================");
+    printf("\n");
+}
+
 void matriculaNaoEncontrada() {
     printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     printf("\nMatrícula não encontrada");
@@ -261,7 +268,7 @@ int gravarRelatorioPorData(struct curso *cursos, int *listaPosicoes, int Tamanho
                 fprintf(arq, "\n---------------------------------");
                 fprintf(arq, "\n");
             }
-            return 1;
+            sucessoInserirArqRelatorios();
         }
     }
     else {
@@ -291,7 +298,7 @@ int gravarRelatorioPorCodigo(struct aluno *alunos, int *listaPosicoes, int taman
                 fprintf(arq, "\n---------------------------------");
                 fprintf(arq, "\n");
             }
-            return 1;
+            sucessoInserirArqRelatorios();
         }
         else {
             fprintf(arq, "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
@@ -325,7 +332,7 @@ int gravarRelatorioPorCPF(struct curso *cursos, int *listaPosicoes, int tamanhoL
                 fprintf(arq, "\n---------------------------------");
                 fprintf(arq, "\n");
             }
-            return 1;
+            sucessoInserirArqRelatorios();
         }
         else {
             fprintf(arq, "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
@@ -1452,7 +1459,7 @@ void Relatorios(int quantTotalMatriculas, char *cpf, char *codigo, struct matric
                     posicao = verificarCodigo(cursos, codigo, &quantCursos);
                     if(posicao >= 0) {
                         tamanhoLista = verificarCodigoParaRelatorio(alunos, matriculas, codigo, quantTotalMatriculas, quantAlunos, listaPosicoes); //altera a lista 
-
+                        
                         if(tamanhoLista > 0) {
                             system("clear||cls");
 
@@ -1468,13 +1475,11 @@ void Relatorios(int quantTotalMatriculas, char *cpf, char *codigo, struct matric
                         else {
                             naoHaCadastro();
                         }
+                        gravarRelatorioPorCodigo(alunos, listaPosicoes, tamanhoLista, codigo);
                     }
                 }
                 else {
                     naoHaCadastro();
-                }
-                if(gravarRelatorioPorCodigo(alunos, listaPosicoes, tamanhoLista, codigo) == 1) {
-                    printf("\nDados inseridos no arquivo com sucesso!");
                 }
             }
             else if(opcao == 2) {
@@ -1486,24 +1491,23 @@ void Relatorios(int quantTotalMatriculas, char *cpf, char *codigo, struct matric
 
                     tamanhoLista = verificarDataRelatorio(matriculas, cursos, quantTotalMatriculas, quantCursos, dataInicio, dataFim, listaPosicoes);
 
-                    if(tamanhoLista > 0) {
-                        for(i = 0; i < tamanhoLista; i++) {
-                            imprimirCurso(cursos, listaPosicoes[i]);
+                    if(tamanhoLista > 0 || tamanhoLista == 0) {
+                        if(tamanhoLista > 0) {
+                            for(i = 0; i < tamanhoLista; i++) {
+                                imprimirCurso(cursos, listaPosicoes[i]);
+                            }
                         }
+                        else {
+                            nenhumaMatriculaEncontrada();
+                        }
+                        gravarRelatorioPorData(cursos, listaPosicoes, tamanhoLista, dataInicio, dataFim);
                     }
                     else if(tamanhoLista < 0) {
                         printf("\nData inserida é inválida");
                     }
-                    else {
-                        nenhumaMatriculaEncontrada();
-                    }
                 }
                 else {
                     naoHaCadastro();
-                }
-
-                if(gravarRelatorioPorData(cursos, listaPosicoes, tamanhoLista, dataInicio, dataFim) == 1) {
-                    printf("\nDados inseridos no arquivo com sucesso!");
                 }
                 
             }
@@ -1524,6 +1528,7 @@ void Relatorios(int quantTotalMatriculas, char *cpf, char *codigo, struct matric
                         else {
                             nenhumaMatriculaEncontrada();
                         }
+                        gravarRelatorioPorCPF(cursos, listaPosicoes, tamanhoLista, cpf);
                     }
                     else {
                         cpfNaoEncontrado();
@@ -1531,10 +1536,6 @@ void Relatorios(int quantTotalMatriculas, char *cpf, char *codigo, struct matric
                 }
                 else {
                     naoHaCadastro();
-                }
-                
-                if(gravarRelatorioPorCPF(cursos, listaPosicoes, tamanhoLista, cpf) == 1) {
-                    printf("\nDados inseridos no arquivo com sucesso!");
                 }
             }
             else if(opcao < 1 || opcao > 4) {
