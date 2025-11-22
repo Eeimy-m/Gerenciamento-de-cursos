@@ -525,8 +525,69 @@ int verificarCodigoParaRelatorio(struct aluno *alunos, struct matricula *matricu
             }
         }
     }
-    printf("%d", contador);
     return contador;
+}
+
+void transformarDataEmInt(char *data, int *dia, int *mes, int *ano) {
+    int i = 0;
+    char copiaData[11];
+    char *token;
+
+    strcpy(copiaData, data);
+    token = strtok(copiaData, "/");
+
+    while(token != NULL && i < 3) {
+        if(i == 0) {
+            *dia = atoi(token);
+            //printf("\nDia: %d", *dia);
+        }
+        else if(i == 1) {
+            *mes = atoi(token);
+            //printf("\nMês: %d", *mes);
+        }
+        else if(i == 2) {
+            *ano = atoi(token);
+            //printf("\nAno: %d", *ano);
+        }
+        token = strtok(NULL, "/"); //continue de onde você parou
+        i++;
+    }
+}
+
+int validarIntervaloDeData(int diaMatric, int mesMatric, int anoMatric, int diaIni, int mesIni, int anoIni, int diaFim, int mesFim, int anoFim) {
+    int dataMatric = anoMatric * 10000 + mesMatric * 100 + diaMatric;
+    int dataInicio = anoIni * 10000 + mesIni * 100 + diaIni;
+    int dataFim = anoFim * 10000 + mesFim * 100 + diaFim;
+
+    if(dataMatric >= dataInicio && dataMatric <= dataFim) {
+        return 1;
+    }
+
+    return 0;
+}
+
+int verificarDataRelatorio(struct matricula *matriculas, struct curso *cursos, int quantMatriculas, int quantCursos, char *dataInicio, char *dataFim, int *listaPosicoes) {
+    //percorrer vetor matriculas e procurar o código de cursos com matrículas ativas entre dataInicio e dataFim
+    int contador = 0, i, posicao;
+    int diaMatricula, mesMatricula, anoMatricula;
+    int diaInseridoIni, mesInseridoIni, anoInseridoIni;
+    int diaInseridoFim, mesInseridoFim, anoInseridoFim;
+
+    transformarDataEmInt(dataInicio, &diaInseridoIni, &mesInseridoIni, &anoInseridoIni); //retorna dia mês e ano de início informado pelo usuário em Int
+    transformarDataEmInt(dataFim, &diaInseridoFim, &mesInseridoFim, &anoInseridoFim);
+    for(i = 0; i < quantMatriculas; i++) {
+        transformarDataEmInt(matriculas[i].dataInicio, &diaMatricula, &mesMatricula, &anoMatricula);
+        if(validarIntervaloDeData(diaMatricula, mesMatricula, anoMatricula, diaInseridoIni, mesInseridoIni, anoInseridoIni, diaInseridoFim, mesInseridoFim, anoInseridoFim) == 1) {
+            posicao = verificarCodigo(cursos, matriculas[i].codigoCurso, &quantCursos);
+            if(posicao >= 0) {
+                listaPosicoes[contador] = posicao;
+                contador++;
+            }
+        } 
+    }
+    printf("Matrículas encontradas entre as datas: %d", contador);
+    return contador;
+    //para comparar as datas: pegar dia, mês e ano e transformar em int
 }
 
 void submenu(int *opcao) {
@@ -705,7 +766,7 @@ void submenuRelatorios(int *opcao) {
     printf("\n=============================");
     printf("\nSubmenu Relatórios:");
     printf("\n1- Mostrar dados de todos os alunos de um curso"); //percorrer matrículas e procurar um código (pegar todos os cpfs dos alunos que tem matrícula ativa nesse curso)
-    printf("\n2- Mostrar os dados de todos os cursos oferecidos entre as datas X e Y"); 
+    printf("\n2- Mostrar os dados de todos os cursos oferecidos entre as datas X e Y"); //dados de todos os cursos entre as datas x e y
     printf("\n3- Mostrar os dados de todos os cursos realizados por um aluno");
     printf("\n4- Sair");
     printf("\n=============================");
@@ -1201,52 +1262,81 @@ void submenuMatricula(struct matricula *matriculas, struct aluno *alunos, struct
 }
 
 void Relatorios(int quantTotalMatriculas, char *cpf, char *codigo, struct matricula *matriculas, struct curso *cursos, struct aluno *alunos, int quantCursos, int quantAlunos) {
+    char *dataInicio, *dataFim;
     int opcao, posicao, tamanhoLista, i;
     int *listaPosicoes;
     listaPosicoes = (int *) malloc (quantTotalMatriculas * sizeof(int));
+    dataInicio = (char *) malloc (11 * sizeof(char));
+    dataFim = (char *) malloc (11 * sizeof(char));
 
-    do {
-        printf("\n=============================");
-        printf("Submenu de Relatórios");
-        submenuRelatorios(&opcao);
+    if(listaPosicoes != NULL && dataInicio != NULL && dataFim != NULL) {
+        do {
+            submenuRelatorios(&opcao);
 
-        if(opcao == 1) {
-            //verificar se existem cadastros de matrículas
-            if(quantTotalMatriculas > 0) {
-                printf("\nInsira o código do curso: ");
-                getchar();
-                fgets(codigo, 11, stdin);
-                codigo[strcspn(codigo, "\n")] = '\0';
+            if(opcao == 1) {
+                //verificar se existem cadastros de matrículas
+                if(quantTotalMatriculas > 0) {
+                    printf("\nInsira o código do curso: ");
+                    getchar();
+                    fgets(codigo, 11, stdin);
+                    codigo[strcspn(codigo, "\n")] = '\0';
 
-                if(verificarCodigo(cursos, codigo, &quantCursos) >= 0) {
-                    tamanhoLista = verificarCodigoParaRelatorio(alunos, matriculas, codigo, quantTotalMatriculas, quantAlunos, listaPosicoes); //altera a lista 
+                    if(verificarCodigo(cursos, codigo, &quantCursos) >= 0) {
+                        tamanhoLista = verificarCodigoParaRelatorio(alunos, matriculas, codigo, quantTotalMatriculas, quantAlunos, listaPosicoes); //altera a lista 
+
+                        if(tamanhoLista > 0) {
+                            //listar todos os dados dos alunos encontrados
+                            for(i = 0; i < tamanhoLista; i++) {
+                                imprimirAluno(alunos, listaPosicoes[i]);
+                            }
+                        }
+                        else {
+                            naoHaCadastro();
+                        }
+                    }
+                }
+                else {
+                    naoHaCadastro();
+                }
+            }
+            else if(opcao == 2) {
+                if(quantTotalMatriculas > 0 ) {
+                    //Inserir uma verificação no formato da data
+                    printf("\nInforme a data de início para o relatório (dd/mm/aaaa): ");
+                    scanf("%s", dataInicio);
+                    printf("\nInforme a data de fim para o relatório (dd/mm/aaaa): ");
+                    scanf("%s", dataFim);
+
+                    tamanhoLista = verificarDataRelatorio(matriculas, cursos, quantTotalMatriculas, quantCursos, dataInicio, dataFim, listaPosicoes);
 
                     if(tamanhoLista > 0) {
-                        //listar todos os dados dos alunos encontrados
                         for(i = 0; i < tamanhoLista; i++) {
-                            imprimirAluno(alunos, listaPosicoes[i]);
+                            imprimirCurso(cursos, listaPosicoes[i]);
                         }
                     }
                     else {
-                        naoHaCadastro();
+                        printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                        printf("\nNão foi encontrada nenhuma matrícula ativa nesse intervalo de tempo");
+                        printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                        printf("\n");
                     }
                 }
+                else {
+                    naoHaCadastro();
+                }
             }
-            else {
-                naoHaCadastro();
+            else if(opcao == 3) {
+
+            }
+            else if(opcao < 1 || opcao > 4) {
+                ImprimirMensagemDeErro();
             }
         }
-        else if(opcao == 2) {
-
-        }
-        else if(opcao == 3) {
-
-        }
-        else if(opcao < 1 || opcao > 4) {
-            ImprimirMensagemDeErro();
-        }
+        while(opcao != 4);   
     }
-    while(opcao != 4);
+    else {
+        MensagemErroAloca();
+    }
 }
 
 void mainMenu() {
