@@ -233,28 +233,35 @@ void inserirEmArqMatricula(struct matricula matriculas[], int *quantAdicionados,
     fclose(arq);
 }
 
-void gravarRelatorioPorData(struct curso *cursos, int posicao, int *listaPosicoes, int TamanhoLista, char *dataIni, char *dataFim) {
+int gravarRelatorioPorData(struct curso *cursos, int *listaPosicoes, int TamanhoLista, char *dataIni, char *dataFim) {
     FILE *arq;
     int i = 0;
     arq = fopen("relatorioPorData.txt", "a");
 
     if(arq != NULL) {
-        fprintf(arq, "Relatório de cursos entre as datas:\n");
-        fprintf(arq, "Data de início: %s", dataIni);
-        fprintf(arq, "Data de fim: %s", dataFim);
+        fprintf(arq, "\n---------------------------------\n");
+        fprintf(arq, "\nRelatório de cursos entre as datas:");
+        fprintf(arq, "\nData de início: %s", dataIni);
+        fprintf(arq, "\nData de fim: %s", dataFim);
+        fprintf(arq, "\n---------------------------------");
 
         if(TamanhoLista == 0) {
-            fprintf(arq, "Nenhuma matrícula encontrada no período procurado.");
+            fprintf(arq, "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            fprintf(arq, "\nNenhuma matrícula encontrada no período procurado.");
+            fprintf(arq, "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            fprintf(arq, "\n");
         }
 
         else {
             for(i = 0; i < TamanhoLista; i++) {
-                fprintf(arq, "Código: %s", cursos[listaPosicoes[i]].codigo);
-                fprintf(arq, "Descrição: %s", cursos[listaPosicoes[i]].descricao);
-                fprintf(arq, "Carga horária: %.2f", cursos[listaPosicoes[i]].cargaHoraria);
-                fprintf(arq, "Preço: %.2f", cursos[listaPosicoes[i]].preco);
-                fprintf(arq, "---------------------------------\n");
+                fprintf(arq, "\nCódigo: %s", cursos[listaPosicoes[i]].codigo);
+                fprintf(arq, "\nDescrição: %s", cursos[listaPosicoes[i]].descricao);
+                fprintf(arq, "\nCarga horária: %.2f", cursos[listaPosicoes[i]].cargaHoraria);
+                fprintf(arq, "\nPreço: %.2f", cursos[listaPosicoes[i]].preco);
+                fprintf(arq, "\n---------------------------------");
+                fprintf(arq, "\n");
             }
+            return 1;
         }
     }
     else {
@@ -262,26 +269,70 @@ void gravarRelatorioPorData(struct curso *cursos, int posicao, int *listaPosicoe
     }
 }
 
-void gravarRelatorioPorCPF(struct aluno *alunos, int posicao, int *listaPosicoes) {
+int gravarRelatorioPorCodigo(struct aluno *alunos, int *listaPosicoes, int tamanhoLista, char *codigo) { 
+    int i, j;
+    FILE *arq;
+    arq = fopen("relatorioPorCodigo.txt", "a");
+
+    if(arq != NULL) {
+        fprintf(arq, "\n---------------------------------");
+        fprintf(arq, "\nRelatório de alunos matriculados em um curso");
+        fprintf(arq, "\nCódigo: %s", codigo);
+        fprintf(arq, "\n---------------------------------");
+        
+        if(tamanhoLista > 0) {
+            for(i = 0; i < tamanhoLista; i++) {
+                fprintf(arq, "\nCPF: %s", alunos[listaPosicoes[i]].cpf);
+                fprintf(arq, "\nNome: %s", alunos[listaPosicoes[i]].nome);
+                fprintf(arq, "\nE-mails:");
+                for(j = 0; j < alunos[listaPosicoes[i]].quantEmails; j++) {
+                    fprintf(arq, "\n%s", alunos[listaPosicoes[i]].emails[j]);
+                }
+                fprintf(arq, "\n---------------------------------");
+                fprintf(arq, "\n");
+            }
+            return 1;
+        }
+        else {
+            fprintf(arq, "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            fprintf(arq, "\nNenhuma matrícula encontrada");
+            fprintf(arq, "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            fprintf(arq, "\n");
+        }
+    }
+    else {
+        MensagemErroAloca();
+    }
+}
+
+int gravarRelatorioPorCPF(struct curso *cursos, int *listaPosicoes, int tamanhoLista, char *cpf) { //cursos que um cpf está matriculado
     int i;
     FILE *arq;
     arq = fopen("relatorioPorCPF.txt", "a");
 
     if(arq != NULL) {
-        fprintf(arq, "Relatório para o cpf %s", alunos[posicao].cpf);
-    }
-    else {
-        MensagemErroAloca();
-    }
-}
+        fprintf(arq, "\n---------------------------------");
+        fprintf(arq, "\nRelatório de cursos em que o cpf está matriculado");
+        fprintf(arq, "\nCPF: %s", cpf);
+        fprintf(arq, "\n---------------------------------");
 
-void gravarRelatorioPorCodigo() {
-    int i;
-    FILE *arq;
-    arq = fopen("relatorioPorCodigo.txt", "a");
-
-    if(arq != NULL) {
-
+        if(tamanhoLista > 0) {
+            for(i = 0; i < tamanhoLista; i++) {
+                fprintf(arq, "\nCódigo: %s", cursos[listaPosicoes[i]].codigo);
+                fprintf(arq, "\nDescrição: %s", cursos[listaPosicoes[i]].descricao);
+                fprintf(arq, "\nCarga Horária: %.2f", cursos[listaPosicoes[i]].cargaHoraria);
+                fprintf(arq, "\nPreço: %.2f", cursos[listaPosicoes[i]].preco);
+                fprintf(arq, "\n---------------------------------");
+                fprintf(arq, "\n");
+            }
+            return 1;
+        }
+        else {
+            fprintf(arq, "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            fprintf(arq, "\nNenhuma matrícula encontrada");
+            fprintf(arq, "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            fprintf(arq, "\n");
+        }
     }
     else {
         MensagemErroAloca();
@@ -1380,7 +1431,7 @@ void submenuMatricula(struct matricula *matriculas, struct aluno *alunos, struct
 
 void Relatorios(int quantTotalMatriculas, char *cpf, char *codigo, struct matricula *matriculas, struct curso *cursos, struct aluno *alunos, int quantCursos, int quantAlunos) {
     char *dataInicio, *dataFim;
-    int opcao, posicao, tamanhoLista, i;
+    int opcao, posicao, tamanhoLista, i, resultado;
     int *listaPosicoes;
     listaPosicoes = (int *) malloc (quantTotalMatriculas * sizeof(int));
     dataInicio = (char *) malloc (11 * sizeof(char));
@@ -1422,6 +1473,9 @@ void Relatorios(int quantTotalMatriculas, char *cpf, char *codigo, struct matric
                 else {
                     naoHaCadastro();
                 }
+                if(gravarRelatorioPorCodigo(alunos, listaPosicoes, tamanhoLista, codigo) == 1) {
+                    printf("\nDados inseridos no arquivo com sucesso!");
+                }
             }
             else if(opcao == 2) {
                 if(quantTotalMatriculas > 0 ) {
@@ -1447,6 +1501,11 @@ void Relatorios(int quantTotalMatriculas, char *cpf, char *codigo, struct matric
                 else {
                     naoHaCadastro();
                 }
+
+                if(gravarRelatorioPorData(cursos, listaPosicoes, tamanhoLista, dataInicio, dataFim) == 1) {
+                    printf("\nDados inseridos no arquivo com sucesso!");
+                }
+                
             }
             else if(opcao == 3) {
                 if(quantTotalMatriculas > 0) {
@@ -1473,6 +1532,10 @@ void Relatorios(int quantTotalMatriculas, char *cpf, char *codigo, struct matric
                 else {
                     naoHaCadastro();
                 }
+                
+                if(gravarRelatorioPorCPF(cursos, listaPosicoes, tamanhoLista, cpf) == 1) {
+                    printf("\nDados inseridos no arquivo com sucesso!");
+                }
             }
             else if(opcao < 1 || opcao > 4) {
                 ImprimirMensagemDeErro();
@@ -1480,6 +1543,10 @@ void Relatorios(int quantTotalMatriculas, char *cpf, char *codigo, struct matric
         }
         while(opcao != 4); 
         if(opcao == 4) {
+            free(dataFim);
+            free(dataInicio);
+            free(listaPosicoes);
+
             system("clear||cls");
 
             printf("\n=============================");
