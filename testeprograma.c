@@ -111,6 +111,21 @@ int TamanhoArqu(FILE *arq, int limite, int sizeStruct) {
     }
 }
 
+void imprimirAlunoRelatorio(struct aluno *alunos, int n) {
+    int i;
+    printf("\n=============================");
+    printf("\nCPF: %s", alunos[n].cpf);
+    printf("\n");
+    printf("\nNome: %s", alunos[n].nome);
+    printf("\n");
+    printf("\nE-mails: ");
+    for(i = 0; i < alunos[n].quantEmails; i++) {
+        printf("\n%s", alunos[n].emails[i]);
+    }
+    printf("\n=============================");
+    printf("\n");
+}
+
 void imprimirAluno(struct aluno listaAlunos[], int n) {
     int i;
     printf("\n=============================");
@@ -216,6 +231,61 @@ void inserirEmArqMatricula(struct matricula matriculas[], int *quantAdicionados,
         } 
     }
     fclose(arq);
+}
+
+void gravarRelatorioPorData(struct curso *cursos, int posicao, int *listaPosicoes, int TamanhoLista, char *dataIni, char *dataFim) {
+    FILE *arq;
+    int i = 0;
+    arq = fopen("relatorioPorData.txt", "a");
+
+    if(arq != NULL) {
+        fprintf(arq, "Relatório de cursos entre as datas:\n");
+        fprintf(arq, "Data de início: %s", dataIni);
+        fprintf(arq, "Data de fim: %s", dataFim);
+
+        if(TamanhoLista == 0) {
+            fprintf(arq, "Nenhuma matrícula encontrada no período procurado.");
+        }
+
+        else {
+            for(i = 0; i < TamanhoLista; i++) {
+                fprintf(arq, "Código: %s", cursos[listaPosicoes[i]].codigo);
+                fprintf(arq, "Descrição: %s", cursos[listaPosicoes[i]].descricao);
+                fprintf(arq, "Carga horária: %.2f", cursos[listaPosicoes[i]].cargaHoraria);
+                fprintf(arq, "Preço: %.2f", cursos[listaPosicoes[i]].preco);
+                fprintf(arq, "---------------------------------\n");
+            }
+        }
+    }
+    else {
+        MensagemErroAloca();
+    }
+}
+
+void gravarRelatorioPorCPF(struct aluno *alunos, int posicao, int *listaPosicoes) {
+    int i;
+    FILE *arq;
+    arq = fopen("relatorioPorCPF.txt", "a");
+
+    if(arq != NULL) {
+        fprintf(arq, "Relatório para o cpf %s", alunos[posicao].cpf);
+    }
+    else {
+        MensagemErroAloca();
+    }
+}
+
+void gravarRelatorioPorCodigo() {
+    int i;
+    FILE *arq;
+    arq = fopen("relatorioPorCodigo.txt", "a");
+
+    if(arq != NULL) {
+
+    }
+    else {
+        MensagemErroAloca();
+    }
 }
 
 int sobrescreverArqAlunos(struct aluno *alunos, int totalAlunos) {
@@ -1328,13 +1398,20 @@ void Relatorios(int quantTotalMatriculas, char *cpf, char *codigo, struct matric
                     fgets(codigo, 11, stdin);
                     codigo[strcspn(codigo, "\n")] = '\0';
 
-                    if(verificarCodigo(cursos, codigo, &quantCursos) >= 0) {
+                    posicao = verificarCodigo(cursos, codigo, &quantCursos);
+                    if(posicao >= 0) {
                         tamanhoLista = verificarCodigoParaRelatorio(alunos, matriculas, codigo, quantTotalMatriculas, quantAlunos, listaPosicoes); //altera a lista 
 
                         if(tamanhoLista > 0) {
+                            system("clear||cls");
+
+                            printf("\n=============================");
+                            printf("\n%s", cursos[posicao].descricao);
+                            printf("\n=============================");
+                            printf("\n");
                             //listar todos os dados dos alunos encontrados
                             for(i = 0; i < tamanhoLista; i++) {
-                                imprimirAluno(alunos, listaPosicoes[i]);
+                                imprimirAlunoRelatorio(alunos, listaPosicoes[i]);
                             }
                         }
                         else {
@@ -1348,7 +1425,6 @@ void Relatorios(int quantTotalMatriculas, char *cpf, char *codigo, struct matric
             }
             else if(opcao == 2) {
                 if(quantTotalMatriculas > 0 ) {
-                    //Inserir uma verificação no formato da data
                     printf("\nInforme a data de início para o relatório (dd/mm/aaaa): ");
                     scanf("%s", dataInicio);
                     printf("\nInforme a data de fim para o relatório (dd/mm/aaaa): ");
