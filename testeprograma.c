@@ -528,7 +528,14 @@ int verificarCodigoParaRelatorio(struct aluno *alunos, struct matricula *matricu
     return contador;
 }
 
-void transformarDataEmInt(char *data, int *dia, int *mes, int *ano) {
+int verificarFormatoDaData(int dia, int mes, int ano) {
+    if(dia > 31 || mes > 12 || ano > 2026) {
+        return 0;
+    }
+    return 1;
+}
+
+int transformarDataEmInt(char *data, int *dia, int *mes, int *ano) {
     int i = 0;
     char copiaData[11];
     char *token;
@@ -552,14 +559,23 @@ void transformarDataEmInt(char *data, int *dia, int *mes, int *ano) {
         token = strtok(NULL, "/"); //continue de onde você parou
         i++;
     }
+    if(verificarFormatoDaData(*dia, *mes, *ano) == 1) {
+        return 1;
+    }
+    return 0;
 }
 
-int validarIntervaloDeData(int diaMatric, int mesMatric, int anoMatric, int diaIni, int mesIni, int anoIni, int diaFim, int mesFim, int anoFim) {
-    int dataMatric = anoMatric * 10000 + mesMatric * 100 + diaMatric;
+int validarIntervaloDeData(int diaMatricIni, int mesMatricIni, int anoMatricIni, int diaMatricFim, int mesMatricFim, int anoMatricFim, int diaIni, int mesIni, int anoIni, int diaFim, int mesFim, int anoFim) {
+    int dataMatricIni = anoMatricIni * 10000 + mesMatricIni * 100 + diaMatricIni;
+    int dataMatricFim = anoMatricFim * 10000 + mesMatricFim * 100 + diaMatricFim;
     int dataInicio = anoIni * 10000 + mesIni * 100 + diaIni;
     int dataFim = anoFim * 10000 + mesFim * 100 + diaFim;
 
-    if(dataMatric >= dataInicio && dataMatric <= dataFim) {
+    if(dataMatricIni >= dataInicio && dataMatricIni <= dataFim) {
+        return 1;
+    }
+
+    else if(dataMatricFim >= dataInicio && dataMatricFim <= dataFim) {
         return 1;
     }
 
@@ -568,30 +584,37 @@ int validarIntervaloDeData(int diaMatric, int mesMatric, int anoMatric, int diaI
 
 int verificarDataRelatorio(struct matricula *matriculas, struct curso *cursos, int quantMatriculas, int quantCursos, char *dataInicio, char *dataFim, int *listaPosicoes) {
     //percorrer vetor matriculas e procurar o código de cursos com matrículas ativas entre dataInicio e dataFim
-    int contador = 0, i, posicao;
-    int diaMatricula, mesMatricula, anoMatricula;
+    int contador = 0, i, posicao, dataValida;
+    int diaMatriculaFim, mesMatriculaFim, anoMatriculaFim;
+    int diaMatriculaIni, mesMatriculaIni, anoMatriculaIni;
     int diaInseridoIni, mesInseridoIni, anoInseridoIni;
     int diaInseridoFim, mesInseridoFim, anoInseridoFim;
 
-    transformarDataEmInt(dataInicio, &diaInseridoIni, &mesInseridoIni, &anoInseridoIni); //retorna dia mês e ano de início informado pelo usuário em Int
-    transformarDataEmInt(dataFim, &diaInseridoFim, &mesInseridoFim, &anoInseridoFim);
-    for(i = 0; i < quantMatriculas; i++) {
-        transformarDataEmInt(matriculas[i].dataInicio, &diaMatricula, &mesMatricula, &anoMatricula);
-        if(validarIntervaloDeData(diaMatricula, mesMatricula, anoMatricula, diaInseridoIni, mesInseridoIni, anoInseridoIni, diaInseridoFim, mesInseridoFim, anoInseridoFim) == 1) {
-            posicao = verificarCodigo(cursos, matriculas[i].codigoCurso, &quantCursos);
-            if(posicao >= 0) {
-                if(contador > 0 && listaPosicoes[contador - 1] != posicao) {
-                    listaPosicoes[contador] = posicao;
-                    contador++;
-                }
-                else if(contador == 0) {
-                    listaPosicoes[contador] = posicao;
-                    contador++;
-                }
+    if(transformarDataEmInt(dataInicio, &diaInseridoIni, &mesInseridoIni, &anoInseridoIni) == 1 && transformarDataEmInt(dataFim, &diaInseridoFim, &mesInseridoFim, &anoInseridoFim) == 1) {
+        for(i = 0; i < quantMatriculas; i++) {
+            if(transformarDataEmInt(matriculas[i].dataInicio, &diaMatriculaIni, &mesMatriculaIni, &anoMatriculaIni) == 1 && transformarDataEmInt(matriculas[i].dataFim, &diaMatriculaFim, &mesMatriculaFim, &anoMatriculaFim) == 1) {
+                if(validarIntervaloDeData(diaMatriculaIni, mesMatriculaIni, anoMatriculaIni, diaMatriculaFim, mesMatriculaFim, anoMatriculaFim, diaInseridoIni, mesInseridoIni, anoInseridoIni, diaInseridoFim, mesInseridoFim, anoInseridoFim) == 1) {
+                    posicao = verificarCodigo(cursos, matriculas[i].codigoCurso, &quantCursos);
+                    if(posicao >= 0) {
+                        if(contador > 0 && listaPosicoes[contador - 1] != posicao) {
+                            listaPosicoes[contador] = posicao;
+                            contador++;
+                        }
+                        else if(contador == 0) {
+                            listaPosicoes[contador] = posicao;
+                            contador++;
+                        }
+                    }
+                }   
             }
-        } 
+            else {
+                return -1;
+            }
+        }
     }
-    printf("Matrículas encontradas entre as datas: %d", contador);
+    else {
+        return -1;
+    }
     return contador;
     //para comparar as datas: pegar dia, mês e ano e transformar em int
 }
@@ -1319,6 +1342,9 @@ void Relatorios(int quantTotalMatriculas, char *cpf, char *codigo, struct matric
                         for(i = 0; i < tamanhoLista; i++) {
                             imprimirCurso(cursos, listaPosicoes[i]);
                         }
+                    }
+                    else if(tamanhoLista < 0) {
+                        printf("\nData inserida é inválida");
                     }
                     else {
                         printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
