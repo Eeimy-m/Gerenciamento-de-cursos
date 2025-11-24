@@ -52,3 +52,91 @@ Nome: Eimy Miura
 E-mails:
 elisa.miura@aluno.ifsp.edu.br
 ---------------------------------
+
+---------------------------------
+Relatório de alunos matriculados em um curso
+Código: 1234ABCD
+---------------------------------
+CPF: 111.111.111-11
+Nome: Elisa EImy Miura
+E-mails:
+fwefowo
+---------------------------------
+
+CPF: 222.222.222-22
+Nome: João Victor Santos Oliveira
+E-mails:
+jwbfefw
+---------------------------------
+
+CPF: 333.333.333-33
+Nome: Cristina Lurika Yasunaga Miura
+E-mails:
+hwfhweo
+---------------------------------
+
+---------------------------------
+Relatório de alunos matriculados em um curso
+Código: 1234ABCD
+---------------------------------
+CPF: 111.111.111-11
+Nome: Elisa EImy Miura
+E-mails:
+fwefowo
+---------------------------------
+
+CPF: 222.222.222-22
+Nome: João Victor Santos Oliveira
+E-mails:
+jwbfefw
+---------------------------------
+
+CPF: 333.333.333-33
+Nome: Cristina Lurika Yasunaga Miura
+E-mails:
+hwfhweo
+---------------------------------
+
+---------------------------------
+Relatório de alunos matriculados em um curso
+Código: 1234ABCD
+---------------------------------
+CPF: 111.111.111-11
+Nome: Elisa EImy Miura
+E-mails:
+fwefowo
+---------------------------------
+
+CPF: 222.222.222-22
+Nome: João Victor Santos Oliveira
+E-mails:
+jwbfefw
+---------------------------------
+
+CPF: 333.333.333-33
+Nome: Cristina Lurika Yasunaga Miura
+E-mails:
+hwfhweo
+---------------------------------
+
+---------------------------------
+Relatório de alunos matriculados em um curso
+Código: 1234ABCD
+---------------------------------
+CPF: 111.111.111-11
+Nome: Elisa EImy Miura
+E-mails:
+fwefowo
+---------------------------------
+
+CPF: 222.222.222-22
+Nome: João Victor Santos Oliveira
+E-mails:
+jwbfefw
+---------------------------------
+
+CPF: 333.333.333-33
+Nome: Cristina Lurika Yasunaga Miura
+E-mails:
+hwfhweo
+---------------------------------

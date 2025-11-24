@@ -10,3 +10,27 @@ Descrição: Curso de python para iniciantes
 Carga horária: 50.00
 Preço: 15.99
 ---------------------------------
+
+---------------------------------
+
+Relatório de cursos entre as datas:
+Data de início: 01/11/2025
+Data de fim: 30/12/2025
+---------------------------------
+Código: 1234ABCD
+Descrição: Curso de python para iniciantes
+Carga horária: 50.00
+Preço: 15.99
+---------------------------------
+
+---------------------------------
+
+Relatório de cursos entre as datas:
+Data de início: 01/11/2025
+Data de fim: 01/01/2026
+---------------------------------
+Código: 1234ABCD
+Descrição: Curso de python para iniciantes
+Carga horária: 50.00
+Preço: 15.99
+---------------------------------

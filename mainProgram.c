@@ -987,7 +987,7 @@ int submenuAlterarCurso(struct curso cursos[], int posicaoAlterar, int *quantTot
         printf("\n");
         printf("\nSelecione uma das opções:");
         scanf("%d", opcao);
-        switch(opcao) {
+            switch(opcao) {
             case 1:
                 printf("Altere a descrição do curso:");
                 fgets(cursos[posicaoAlterar].descricao, 61, stdin);
@@ -1028,6 +1028,7 @@ int submenuAlterarMatricula(struct matricula matriculas[], int posicaoAlterar, i
         printf("\n");
         printf("\nSelecione uma das opções:");
         scanf("%d", &opcao);
+
         switch(opcao) {
             case 1:
                 printf("\nDesconto:");
@@ -1057,7 +1058,6 @@ int submenuAlterarMatricula(struct matricula matriculas[], int posicaoAlterar, i
 }
 
 void submenuRelatorios(int *opcao) {
-    system("clear||cls");
     printf("\n=============================");
     printf("\nSubmenu Relatórios:");
     printf("\n1- Mostrar dados de todos os alunos de um curso"); //percorrer matrículas e procurar um código (pegar todos os cpfs dos alunos que tem matrícula ativa nesse curso)
@@ -1071,7 +1071,6 @@ void submenuRelatorios(int *opcao) {
 }
 
 void submenuAlterarExcluir(int *opcao) {
-    system("clear||cls");
     printf("\n=============================");
     printf("\nSubmenu alterar ou excluir");
     printf("\n1- Alterar");
@@ -1088,8 +1087,6 @@ void submenuAlunos(struct aluno alunos[], char *cpf, int *quantTotal, int quantA
     int quantAdicionados = 0;
 
     do{
-        system("clear||cls");
-
         printf("\n=============================");
         printf("\nSubmenu de Alunos");
         submenu(&opcao);
@@ -1177,7 +1174,7 @@ void submenuAlunos(struct aluno alunos[], char *cpf, int *quantTotal, int quantA
                         posicao = verificarCPF(alunos, cpf, quantTotal);
 
                         if(posicao >= 0) {
-                            if(opcao == 1) {
+                            if(opcaoSubmenu == 1) {
                                 resultado = submenuAlterarAluno(alunos, posicao, quantTotal);
                                 resultSobrescrever = sobrescreverArqAlunos(alunos, *quantTotal);
                                 if(resultSobrescrever == 1 && resultado == 1) {
@@ -1241,8 +1238,6 @@ void submenuCursos(struct curso cursos[], char *codigo, int *quantTotal, int qua
     int quantAdicionados = 0;
 
     do{
-        system("clear||cls");
-
         printf("\n=============================");
         printf("\nSubmenu de Cursos:");
         submenu(&opcao);
